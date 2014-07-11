@@ -1,0 +1,9 @@
+Ext.define('B.view.apps.mail.VMailComposeTb',{
+	extend:'Ext.panel.Panel',
+	alias:'widget.VMailComposeTb',
+	layout:'hbox',
+	defaults:{
+		xtype:'button',
+		margin:'2 3 2 3'
+	}
+}); 

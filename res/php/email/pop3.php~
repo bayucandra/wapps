@@ -1,0 +1,8 @@
+<?php
+	require("../functions/email.php");
+
+	$arr_pop3=array("hostname"=>"mail.allfromboatfurniture.com","port"=>110,"tls"=>0,"user"=>"test@allfromboatfurniture.com","password"=>"test");
+	pop3_list($arr_pop3);
+// 	if($error!="")
+// 		echo "<H2>Error: ",HtmlSpecialChars($error),"</H2>";
+?>

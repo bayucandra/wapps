@@ -1,0 +1,8 @@
+Ext.define('B.view.apps.mail.Mail',{
+	extend:'Ext.panel.Panel',
+	alias:'widget.VMail',
+	layout:'border',
+	initComponent:function(){
+		
+	}
+});

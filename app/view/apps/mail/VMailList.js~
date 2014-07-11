@@ -1,0 +1,16 @@
+Ext.define('B.view.apps.mail.VMailList',{
+	extend:'Ext.tab.Panel',
+	alias:'widget.VMailList',
+	defaults:{
+		bodyPadding:10
+	},
+	border:false,
+	items:[{
+		title:'Mail list',
+		html:'Mail Box'
+	},{
+		title:'Read',
+		html:'Tst',
+		closeable:true
+	}]
+}); 

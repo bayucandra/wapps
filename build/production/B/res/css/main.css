@@ -1,0 +1,99 @@
+#app-title{
+	position:relative;
+	color:#b81017;
+}
+#app-title .logout a:link{
+	color:#FF0000;
+	font-size:12px;
+	float:right;
+	margin:5px 5px 0 0;
+	text-decoration:none;
+}
+#app-title .logout a:visited{
+	color:#FF0000;
+}
+#app-title .logout a:hover{
+	color:#FFFF00;
+	font-size:12px;
+	float:right;
+	margin:5px 5px 0 0;
+	text-decoration:underline;
+}
+
+
+.tasks-new {
+	background: url('../images/new.png') no-repeat;
+}
+/*
+ * New Task Form
+ */
+.tasks-new-form .x-form-item {
+    margin: 2px 1px 2px 1px;
+}
+.tasks-new-form .tasks-new {
+    background-position: 4px 5px;
+}
+.tasks-new-form .x-form-field, .x-form-display-field {
+    font-size: 11px;
+}
+
+
+.fred{
+	color:#FF0000;
+}
+.farial{
+	font-family:arial,helvetica,sans-serif,sans;
+}
+.fsans{
+	font-family:sans, sans-serif, serif;
+}
+.ftahoma{
+	font-family:Tahoma, Geneva, sans-serif;
+}
+.ftimes{
+	font-family:"Times New Roman",Georgia,Serif;
+}
+.fcourier{
+	font-family:"Courier New", Courier, monospace;
+}
+.fbold{
+	font-weight:bold;
+}
+.fitalic{
+	font-style:italic;
+}
+.funderline{
+	text-decoration:underline;
+}
+.f12{
+	font-size:12px;
+}
+.f13{
+	font-size:13px;
+}
+.f14{
+	font-size:14px;
+}
+.f15{
+	font-size:15px;
+}
+.f16{
+	font-size:16px;
+}
+.f17{
+	font-size:17px;
+}
+.f18{
+	font-size:18px;
+}
+.f19{
+	font-size:19px;
+}
+.f20{
+	font-size:20px;
+}
+.sh{
+	-webkit-box-shadow: 0px 1px 5px 0px #4a4a4a;
+	-moz-box-shadow: 0px 1px 5px 0px #4a4a4a;
+	box-shadow: 0px 1px 5px 0px #4a4a4a;
+}

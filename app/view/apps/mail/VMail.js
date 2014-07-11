@@ -1,0 +1,36 @@
+Ext.define('B.view.apps.mail.VMail',{
+	extend:'Ext.panel.Panel',
+	requires:[
+		'B.view.apps.mail.MailController'
+	],
+	controller:'mail',
+	alias:'widget.VMail',
+	layout:'border',
+	items:[
+		{
+			xtype:'VMailBox',
+			region:'west',
+			width:200,
+			minWidth:100,
+			maxWidth:300,
+			split:true
+		},
+		{
+			xtype: 'panel',
+			id:'panel_mail_content',
+			region:'center',
+			layout:'border',
+			items:[{
+					xtype:'VMailListTab',
+					id:'mail_list_tab',
+					region:'center',
+					minHeight:40
+				}],
+			tbar:[{
+					text:'Compose',
+					handler:'composeMail'
+				}
+     			]
+		}
+	]
+});

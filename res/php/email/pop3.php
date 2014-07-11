@@ -1,0 +1,12 @@
+<?php
+	require("../connect/db.php");
+	require("../functions/email.php");
+	$arr_mail_conf=array(
+			"hostname"=>"mail.allfromboatfurniture.com",
+			"port"=>110,
+			"tls"=>0,
+			"user"=>"test@allfromboatfurniture.com",
+			"password"=>"test"
+		);
+	pop3_list($arr_mail_conf);
+?>
