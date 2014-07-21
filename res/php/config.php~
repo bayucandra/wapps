@@ -10,7 +10,7 @@
 		"admin_contact"=>"bayucandra@gmail.com"
 	)));
 
-	define("DEV_MODE",0);
+	define("DEV_MODE",1);
 	define("MYSQL_CONFIG",serialize(
 		array(
 			"host" => "localhost",

@@ -14,9 +14,9 @@
 	define("MYSQL_CONFIG",serialize(
 		array(
 			"host" => "localhost",
-			"username" =>"k1176435_wnews",
-			"password" => "J3p4r4_G",
-			"db_name" => "k1176435_wnews"
+			"username" =>"root",
+			"password" => "Th3_k1nG",
+			"db_name" => "wapps"
 			)
 	));
 	define("ADMIN_UID",0);

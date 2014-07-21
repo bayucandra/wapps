@@ -1,10 +1,11 @@
 <?php
+	$path_relative=".";
 	if(isset($_SESSION["root_path"])){
 		require_once($_SESSION[SESSION_NM]['root_path'].'/res/php/config.php');
 		require_once($_SESSION[SESSION_NM]['root_path']."/res/php/functions/general.php");
 	}else{//For CRUD and another purpose must include 'config.php' file at the relative path
-		require_once('../functions/general.php');
-		require_once('../config.php');
+		require_once($path_relative.'/functions/general.php');
+		require_once($path_relative.'/config.php');
 	}
 	
 
