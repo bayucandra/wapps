@@ -5,15 +5,19 @@ require_once($path_relative."/functions/general.php");
 b_set_time_zone("Asia/Jakarta");
 class BMail{
 	private $mbox,$db,$msg_encoding;
-	private $mail_account_arr,$is_verbose;
+	private $mail_account_arr,$is_verbose,$mail_box_attachment_path;
 	private $cur_message_idx_arr;//Array ( [0] => 2 [1] => 1 )
 	private $cur_msg_content_arr;//Array ("msg_html","msg_plain");
-	function __construct($p_db_PDO,$p_arr=array()){//$p_arr=array("verbose"=>true/false,"msg_encoding")
+	function __construct($p_db_PDO,$p_arr=array()){//$p_arr=array("verbose"=>true/false,"msg_encoding"=>"UTF-8 etc.","mail_box_attachment_path")
 		$this->is_verbose=false;
 		$this->cur_msg_content_arr_reset();
 		if(isset($p_arr)){
 			if(isset($p_arr["verbose"]))
 				$this->is_verbose=$p_arr["verbose"];
+			if(isset($p_arr["msg_encoding"]))
+				$this->msg_encoding=$p_arr["msg_encoding"];
+			if(isset($p_arr["mail_box_attachment_path"]))
+				$this->mail_box_attachment_path=$p_arr["mail_box_attachment_path"];
 		}
 		
 		$this->db=$p_db_PDO;
@@ -69,7 +73,6 @@ class BMail{
 		if($this->check_conn()===false)
 			return false;
 		$header=imap_headerinfo($this->mbox,$this->cur_message_idx_arr[$p_idx]);
-		print_r(imap_rfc822_parse_headers(imap_fetchheader($this->mbox,$this->cur_message_idx_arr[$p_idx])));
 
 		$this->verbose("*FUNCTION sync_mail()=> syncing mailbox messages to DB.");
 		if($this->is_msg_id_exist($header->message_id)===false){
@@ -95,6 +98,7 @@ class BMail{
 			if($qry_ins_mail_box->rowCount()==1){
 				$idmail_box=$this->db->lastInsertId();
 				$this->msgtodb($p_msg_idx,$idmail_box);
+				$this->mail_box_addresses_insert($idmail_box,$header_rfc822);
 			}
 		}catch(PDOException $e){
 			$this->log_insert("Error when calling save_msg:".$e->getMessage());
@@ -106,13 +110,13 @@ class BMail{
 		$ifs=imap_fetchstructure($this->mbox,$p_msg_idx);
 		if(isset($ifs->parts)){
 			foreach($ifs->parts as $partno_idx=>$sub_part)
-				$this->msg_structure_parse($p_msg_idx,$sub_part,$partno_idx+1);
+				$this->msg_structure_parse($p_msg_idx,$p_idmail_box,$sub_part,$partno_idx+1);
 		}else{
-			$this->msg_structure_parse($p_msg_idx,$ifs,0);
+			$this->msg_structure_parse($p_msg_idx,$p_idmail_box,$ifs,0);
 		}
 		$this->msgtodb_save_text($p_idmail_box);
 	}
-	private function msg_structure_parse($p_msg_idx,$p_ifs_objs,$p_partno){
+	private function msg_structure_parse($p_msg_idx,$p_idmail_box,$p_ifs_objs,$p_partno){
 		$this->verbose("parsing part:".$p_partno);
 		$data=($p_partno)?
 			imap_fetchbody($this->mbox,$p_msg_idx,$p_partno):
@@ -126,18 +130,67 @@ class BMail{
 		if($p_ifs_objs->parameters)
 			foreach($p_ifs_objs->parameters as $parameter)
 				$params[strtolower($parameter->attribute)]=$parameter->value;
-		//TEXT (STORE AT OBJECT cur_msg_content_arr)
+		//BEGIN TEXT (STORE AT OBJECT cur_msg_content_arr)=========
 		if($p_ifs_objs->type==0 && $data){
 			if(strtolower($p_ifs_objs->subtype)=='plain')
-				$this->cur_msg_content_arr["msg_plain"].=trim(mb_convert_encoding($data,"UTF-8",$params["charset"]))."\n\n";
+				$this->cur_msg_content_arr["msg_plain"].=trim(mb_convert_encoding($data,$this->msg_encoding,$params["charset"]))."\n\n";
 			else
-				$this->cur_msg_content_arr["msg_html"].=mb_convert_encoding($data,"UTF-8",$params["charset"])."<br/><br/>";
+				$this->cur_msg_content_arr["msg_html"].=mb_convert_encoding($data,$this->msg_encoding,$params["charset"])."<br/><br/>";
 		}
+		//END TEXT******************
+		//BEGIN ATTACHMENTS===============
+		if(isset($params["filename"])||isset($params["name"])){
+			$disposition=strtolower($p_ifs_objs->disposition);
+			$basename=(isset($params["filename"]))?$params["filename"]:$params["name"];
+			$this->save_attachment($data,$p_idmail_box,$basename,$disposition,$p_ifs_objs->type);
+		}
+		//END ATTACHEMENTS***************
+		unset($data);//SAVE MEMORY BY DELETING $data
+		
 		//RECURSION
 		if(isset($p_ifs_objs->parts)){
 			foreach($p_ifs_objs->parts as $partno2=>$ifs_objs2)
-				$this->msg_structure_parse($p_msg_idx,$ifs_objs2,$p_partno.".".($partno2+1));
+				$this->msg_structure_parse($p_msg_idx,$p_idmail_box,$ifs_objs2,$p_partno.".".($partno2+1));
 		}
+	}
+	private function save_attachment($p_data,$p_idmail_box,$p_basename,$p_disposition,$p_type){
+		$dst_path_base=$this->mail_box_attachment_path."/".$p_idmail_box;
+		if(!file_exists($dst_path_base)){
+			if(!mkdir($dst_path_base,0775,true))
+				return;
+		}
+		$order_no=$this->save_attachment_db($p_idmail_box,$p_basename,$p_disposition,$p_type);
+		$dst_path_file=$dst_path_base."/".$order_no."-".$p_basename;
+		
+		$fp=fopen($dst_path_file,'w');
+		if($fp!==false){
+			fwrite($fp,$p_data);
+			fclose($fp);
+		}
+		
+	}
+	private function save_attachment_db($p_idmail_box,$p_basename,$p_disposition,$p_type){
+		$order_no=0;
+		$qry_str_count_exist="SELECT COUNT(idmail_box) FROM mail_box_attachments WHERE idmail_box=$p_idmail_box LIMIT 1";
+		$qry_count_exist=$this->db->prepare($qry_str_count_exist);
+		try{
+			if($qry_count_exist->execute()){
+				$fa_count=$qry_count_exist->fetch(PDO::FETCH_NUM);
+				$attachment_count=$fa_count[0];
+				$order_no=$attachment_count+1;
+				$qry_str_ins="INSERT INTO mail_box_attachments(`order_no`,`idmail_box`,`basename`,`disposition`,`type`)
+						VALUES($order_no,$p_idmail_box,:basename,'$p_disposition','$p_type')";
+				$qry_ins=$this->db->prepare($qry_str_ins);
+				try{
+					$qry_ins->execute(array(":basename"=>$p_basename));
+				}catch(PDOException $e){
+					$this->log_insert("save_attachment_db()-insert:".$e->getMessage());
+				}
+			}
+		}catch(PDOException $e){
+			$this->log_insert("save_attachment_db():".$e->getMessage());
+		}
+		return $order_no;
 	}
 	private function msgtodb_save_text($p_idmail_box){//THIS IS LAST PROCEDURE OF POP3 MESSAGE SYNC. MUST SET mail_box.is_finished = 1
 		$error_msg="";
@@ -147,21 +200,8 @@ class BMail{
 				WHERE `idmail_box`=$p_idmail_box LIMIT 1";
 		$qry_ins=$this->db->prepare($qry_str_ins);
 		try{
-			if($qry_ins->execute(array(":message_plain"=>$this->cur_msg_content_arr["msg_plain"]
-				,":message_html"=>$this->cur_msg_content_arr["msg_html"]))
-			){//BEGIN SET mail_box.is_finished=1
-				$qry_str_set_finished="UPDATE `mail_box`
-						SET is_finished=1
-						WHERE idmail_box=$p_idmail_box
-						LIMIT 1";
-				$qry_set_finished=$this->db->prepare($qry_str_set_finished);
-				try{
-					$qry_set_finished->execute();
-				}catch(PDOException $e){
-					$error_msg.=$e->getMessage()."=======<br />";
-					$this->log_insert("Error for function msgtodb_save_text() when trying set is_finished=1".$e->getMessage());
-				}
-			}
+			$qry_ins->execute(array(":message_plain"=>$this->cur_msg_content_arr["msg_plain"]
+				,":message_html"=>$this->cur_msg_content_arr["msg_html"]));
 		}catch(PDOException $e){
 			$error_msg.=$e->getMessage()."=========<br />";
 			$this->log_insert("Error for function msgtodb_save_text():".$e->getMessage());
@@ -174,20 +214,20 @@ class BMail{
 	}
 	private function del_unfinished_mail(){
 		$error_msg="";
-		$qry_str_del_mail_attachments="DELETE mat
-				FROM mail_attachments mat
-					LEFT JOIN mail_box mb ON ( mat.idmail_box = mb.idmail_box )
+		$qry_str_del_mail_attachments="DELETE mba
+				FROM mail_box_attachments mba
+					LEFT JOIN mail_box mb ON ( mba.idmail_box = mb.idmail_box )
 				WHERE mb.is_finished=0";
 		$qry_del_mail_attachments=$this->db->prepare($qry_str_del_mail_attachments);
 		try{
 			if($qry_del_mail_attachments->execute()){
-				$qry_str_del_mail_addresses="DELETE mad
-					FROM mail_addresses mad
-						LEFT JOIN mail_box mb ON(mad.idmail_box = mb.idmail_box)
+				$qry_str_del_mail_box_addresses="DELETE mba
+					FROM mail_box_addresses mba
+						LEFT JOIN mail_box mb ON(mba.idmail_box = mb.idmail_box)
 					WHERE mb.is_finished=0";
-				$qry_del_mail_addresses=$this->db->prepare($qry_str_del_mail_addresses);
+				$qry_del_mail_box_addresses=$this->db->prepare($qry_str_del_mail_box_addresses);
 				try{
-					if($qry_del_mail_addresses->execute()){
+					if($qry_del_mail_box_addresses->execute()){
 						$qry_str_del_mail_box="DELETE FROM mail_box 
 							WHERE is_finished=0";
 						$qry_del_mail_box=$this->db->prepare($qry_str_del_mail_box);
@@ -200,7 +240,7 @@ class BMail{
 					}
 				}catch(PDOException $e){
 					$error_msg.=$e->getMessage()."======<br/>";
-					$this->log_insert("Error for function del_unfinished_mail() for query:\$qry_str_del_mail_addresses:".$e->getMessage());
+					$this->log_insert("Error for function del_unfinished_mail() for query:\$qry_str_del_mail_box_addresses:".$e->getMessage());
 				}
 			}
 		}catch(PDOException $e){
@@ -229,6 +269,47 @@ class BMail{
 		}
 		
 		$this->verbose("*FUNCTION:Checking if have mesage_id: $p_msg_idx already exist at the mailbox record. Error message: $error_msg");
+	}
+	private function mail_box_addresses_insert($p_idmail_box,$p_header_rfc822){
+		if(isset($p_header_rfc822->to))
+			$this->mail_box_addresses_sql($p_idmail_box,"to",$p_header_rfc822->to);
+		if(isset($p_header_rfc822->from))
+			$this->mail_box_addresses_sql($p_idmail_box,"from",$p_header_rfc822->from);
+		if(isset($p_header_rfc822->cc))
+			$this->mail_box_addresses_sql($p_idmail_box,"cc",$p_header_rfc822->cc);
+		if(isset($p_header_rfc822->reply_to))
+			$this->mail_box_addresses_sql($p_idmail_box,"reply_to",$p_header_rfc822->reply_to);
+		if(isset($p_header_rfc822->sender))
+			$this->mail_box_addresses_sql($p_idmail_box,"sender",$p_header_rfc822->sender);
+
+		//BEGIN SET mail_box.is_finished=1
+		$qry_str_set_finished="UPDATE `mail_box`
+				SET is_finished=1
+				WHERE idmail_box=$p_idmail_box
+				LIMIT 1";
+		$qry_set_finished=$this->db->prepare($qry_str_set_finished);
+		try{
+			$qry_set_finished->execute();
+		}catch(PDOException $e){
+			$error_msg.=$e->getMessage()."=======<br />";
+			$this->log_insert("Error for function msgtodb_save_text() when trying set is_finished=1".$e->getMessage());
+		}
+	}
+	private function mail_box_addresses_sql($p_idmail_box,$p_addr_type,$p_addrs){
+		foreach($p_addrs as $addr){
+			$personal="";
+			if(isset($addr->personal)) $personal=$addr->personal;
+			$email_addr=$addr->mailbox."@".$addr->host;
+			$qry_str_ins="INSERT INTO `mail_box_addresses`(idmail_box,idmail_addr_type,personal,email_address)
+				VALUES($p_idmail_box,(SELECT idmail_addr_type FROM mail_address_type WHERE `description`='$p_addr_type' LIMIT 1)
+					,'$personal','$email_addr')";
+			$qry_ins=$this->db->prepare($qry_str_ins);
+			try{
+				$qry_ins->execute();
+			}catch(PDOException $e){
+				$this->log_insert("mail_box_addresses_sql():".$e->getMessage());
+			}
+		}
 	}
 	function get_msg_idxs(){
 		if($this->check_conn()===false)
