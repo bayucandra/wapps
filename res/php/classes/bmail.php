@@ -89,8 +89,8 @@ class BMail{
 		$subject=$header_rfc822->subject;
 		$message_date_obj=new DateTime($header_rfc822->date);
 		$message_date=$message_date_obj->format("Y-m-d H:i:s");
-		$qry_str_ins_mail_box="INSERT INTO `mail_box`(idmail_account,message_id,subject,message_date,message_plain,message_html)
-			VALUES($idmail_account,'$message_id','$subject','$message_date','','')";
+		$qry_str_ins_mail_box="INSERT INTO `mail_box`(idmail_box_type,idmail_account,message_id,subject,message_date,message_plain,message_html)
+			VALUES(1,$idmail_account,'$message_id','$subject','$message_date','','')";
 		$qry_ins_mail_box=$this->db->prepare($qry_str_ins_mail_box);
 		$err_db_msg="<b>none</b>";
 		try{
@@ -101,8 +101,9 @@ class BMail{
 				$this->mail_box_addresses_insert($idmail_box,$header_rfc822);
 			}
 		}catch(PDOException $e){
-			$this->log_insert("Error when calling save_msg:".$e->getMessage());
-			$err_db_msg=$e->getMessage();
+			$err_msg=$e->getMessage();
+			$this->log_insert("Error when calling save_msg:".$err_msg);
+			$err_db_msg=$err_msg;
 		}
 		$this->verbose("*FUNCTION save_msg() => INSERTING message detail to DB. Message/Error:".$err_db_msg);
 	}
@@ -117,7 +118,7 @@ class BMail{
 		$this->msgtodb_save_text($p_idmail_box);
 	}
 	private function msg_structure_parse($p_msg_idx,$p_idmail_box,$p_ifs_objs,$p_partno){
-		$this->verbose("parsing part:".$p_partno);
+// 		$this->verbose("parsing part:".$p_partno);
 		$data=($p_partno)?
 			imap_fetchbody($this->mbox,$p_msg_idx,$p_partno):
 			imap_body($this->mbox,$p_msg_idx);
@@ -150,7 +151,7 @@ class BMail{
 		//RECURSION
 		if(isset($p_ifs_objs->parts)){
 			foreach($p_ifs_objs->parts as $partno2=>$ifs_objs2)
-				$this->msg_structure_parse($p_msg_idx,$ifs_objs2,$p_partno.".".($partno2+1));
+				$this->msg_structure_parse($p_msg_idx,$p_idmail_box,$ifs_objs2,$p_partno.".".($partno2+1));
 		}
 	}
 	private function save_attachment($p_data,$p_idmail_box,$p_basename,$p_disposition,$p_type){

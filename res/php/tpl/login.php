@@ -10,7 +10,7 @@
 			<tr>
 				<td><label>Username</label></td>
 				<td>:</td>
-				<td><input name="username" maxlength="20" type="text" autocomplete="off" /></td>
+				<td><input name="email" maxlength="20" type="text" autocomplete="off" /></td>
 			</tr>
 			<tr>
 				<td>Password</td>
@@ -18,7 +18,7 @@
 				<td><input name="password" maxlength="20" type="password" /></td>
 			</tr>
 			<tr>
-				<td colspan="3" align="right"><input name="wsys_login" type="submit" value="Login" /></td>
+				<td colspan="3" align="right"><input name="wapps_login" type="submit" value="Login" /></td>
 			</tr>
 		</table>
 	</form>

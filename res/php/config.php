@@ -4,7 +4,7 @@
 	define("APP_DETAIL",serialize(array(
 		"app_name"=>"Wisanka Apps",
 		"app_version"=>"0.1",
-		"app_title"=>"Wisanka Newsletter",
+		"app_title"=>"Wisanka Applications",
 		"app_description"=>"Wisanka Applications",
 		"company_name"=>"PT.Wisanka",
 		"admin_contact"=>"bayucandra@gmail.com"

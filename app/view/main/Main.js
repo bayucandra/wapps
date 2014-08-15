@@ -6,7 +6,7 @@
  * TODO - Replace this content of this view to suite the needs of your application.
  */
 Ext.define('B.view.main.Main', {
-    extend: 'Ext.container.Container',
+    extend: 'Ext.container.Viewport',
 
     xtype: 'app-main',
     
@@ -24,7 +24,18 @@ Ext.define('B.view.main.Main', {
       region:'north',
       bodyStyle:{"background-color":"#DFE8F6"},
       bodyPadding: 2,
-      html:'<div id="app-title" class="farial fbold f20"><img style="float:left;margin:0 0 0 5px;" src="res/images/wisanka.png" /><div style="float:left;margin:5px 0 0 5px;">'+app_detail.app_name+' <span style="font-size:12px">V.'+app_detail.app_version+'</span></div><div class="logout"><a href="?logout=true">Logout</a></div></div>'
+      layout:'hbox',
+      items:[{
+		xtype:'panel',
+		bodyStyle:{"background-color":"#DFE8F6"},
+		html:'<div id="app-title" class="farial fbold f20"><img style="float:left;margin:0 0 0 5px;" src="res/images/wisanka.png" /><div style="float:left;margin:5px 0 0 5px;">'+app_detail.app_name+' <span style="font-size:12px">V.'+app_detail.app_version+'</span></div></div>',
+		flex:1
+      },{
+		xtype:'button',
+		text:'Logout',
+		icon:'res/images/ui-icons/logout-18.png',
+		handler:'logout'
+	}]
     },{
         xtype: 'panel',
         title: 'Main menu',
@@ -34,6 +45,7 @@ Ext.define('B.view.main.Main', {
 	maxWidth:350,
         split: true,
 	collapsible:true,
+	floatable:false,
         items:[
 		{xtype:'MenuMail'}
 	],
@@ -42,7 +54,26 @@ Ext.define('B.view.main.Main', {
         region: 'center',
         xtype: 'panel',
 	id:'main-content',
-        html:'<h1>Wisanka Applications</h1>',
+// 	layout:'center',
+        items:[
+		{
+			id:'main_panel_logo',
+			header:false,
+			width:'90%',
+			bodyStyle:{"background-color":"none"},
+			layout:'center',
+			items:[
+				{
+					header:false,
+					xtype:'panel',
+					width:113,
+					height:113,
+					bodyStyle:{"background-color":"none"},
+					html:'<img src="res/images/loading.gif" />'
+				}
+			]
+		}
+	],
 	layout:'fit'
     }]
 });

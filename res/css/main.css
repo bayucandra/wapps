@@ -37,9 +37,21 @@
     font-size: 11px;
 }
 
+.loading_img{
+	width:113px;
+	height:113px;
+	border:none;
+	background-image:url('res/images/loading.gif')!important;
+}
 
 .fred{
 	color:#FF0000;
+}
+.fgray4{
+	color:#444444;
+}
+.fgray9{
+	color:#999999;
 }
 .farial{
 	font-family:arial,helvetica,sans-serif,sans;
@@ -97,3 +109,6 @@
 	-moz-box-shadow: 0px 1px 5px 0px #4a4a4a;
 	box-shadow: 0px 1px 5px 0px #4a4a4a;
 }
+/* BEGIN EXTJs UI *************************/
+
+/* END EXTJs UI ***************************/

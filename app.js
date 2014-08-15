@@ -8,7 +8,7 @@ Ext.application({
 
     extend: 'B.Application',
     
-    autoCreateViewport: 'B.view.main.Main'
+//     autoCreateViewport: 'B.view.main.Main'
 	
     //-------------------------------------------------------------------------
     // Most customizations should be made to B.Application. If you need to

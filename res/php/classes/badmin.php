@@ -98,16 +98,16 @@ class BAdmin extends Smarty{
 		}
 	}
 	//END: ADMIN MODE REDIRECT**********************************************************
-	public function login($p_username,$p_password){
-		$str_qry="SELECT * FROM `user` WHERE `username`='$p_username'";
+	public function login($p_email,$p_password){
+		$str_qry="SELECT * FROM mail_account WHERE `email`=:p_email";
 		$query=$this->db->prepare($str_qry);
 		try{
-			$query->execute();
-			$data_tbl_user =$query->fetch();
-			$record_password = $data_tbl_user['password'];
-			$record_iduser = $data_tbl_user['iduser'];
+			$query->execute(array(":p_email"=>$p_email));
+			$data_tbl_email =$query->fetch();
+			$record_password = $data_tbl_email['password'];
+			$record_idmail_account = $data_tbl_email['idmail_account'];
 			if($record_password===get_enc_password($p_password,ENC_PASSWORD)){
-				return $record_iduser;
+				return $record_idmail_account;//THE RETURN IF TRUE!!!!!
 			}else{
 				return false;
 			}
@@ -132,15 +132,15 @@ class BAdmin extends Smarty{
 	}
 	public function post_check_login(){
 		if(empty($_POST)===false){
-			if(isset($_POST["wsys_login"])){
-				$username=trim($_POST["username"]);
+			if(isset($_POST["wapps_login"])){
+				$email=trim($_POST["email"]);
 				$password=trim($_POST["password"]);
-				if(empty($username)===true || empty($password)===true){
+				if(empty($email)===true || empty($password)===true){
 					$this->errors[]="Username or password can't be empty";
 				}else{
-					$login=$this->login($username,$password);//return iduser for admin
+					$login=$this->login($email,$password);//return iduser for admin
 					if($login===false){
-						$this->errors[]="Sorry, username/password is incorrect. Please check again.";
+						$this->errors[]="Sorry, Email/password is incorrect. Please check again.";
 					}else{
 						$_SESSION[$this->session_nm]["iduser"]=$login;
 						$this->init_session($login);

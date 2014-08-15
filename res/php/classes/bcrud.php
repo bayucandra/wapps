@@ -4,6 +4,35 @@ class BCrud{
 	public function __construct($p_db_PDO){
 		$this->db=$p_db_PDO;
 	}
+	public function mail_inbox_list($p_idmail_account){
+		$json_result=array(
+			"success"=>false,
+			"records"=>array(),
+			"message"=>""
+		);
+		$qry_str_sel="SELECT mba.email_address AS addr_from, mb.subject,mb.message_date,mb.message_plain,mb.message_html
+			FROM mail_box mb
+				LEFT JOIN mail_box_type mbt
+					ON(mb.idmail_box_type=mbt.idmail_box_type)
+				LEFT JOIN (mail_box_addresses mba
+					LEFT JOIN mail_address_type mat
+						ON(mba.idmail_addr_type=mat.idmail_addr_type)
+				)ON(mb.idmail_box=mba.idmail_box)
+				WHERE mb.idmail_account=$p_idmail_account
+					AND mat.description='from' AND mbt.description='inbox'
+				ORDER BY mb.message_date DESC";
+		$qry_sel=$this->db->prepare($qry_str_sel);
+		try{
+			$qry_sel->execute();
+			$json_result["success"]=true;
+			$json_result["records"]=$qry_sel->fetchAll(PDO::FETCH_ASSOC);
+		}catch(PDOException $e){
+			$json_result["success"]=false;
+			$json_result["message"]=$e->getMessage();
+		}
+		echo json_encode($json_result);
+	}
+/*	
 	public function mailbox_list(){
 		
 		$xmlDoc=new DOMDocument();
@@ -16,7 +45,7 @@ class BCrud{
 		header("Content-Type: text/xml");
 		$xmlDoc->formatOutput=true;
 		echo $xmlDoc->saveXml();
-	}
+	}*/
 	
 	
 	//BEGIN WNEWS FUNCTIONS=================================================

@@ -1,5 +1,7 @@
 <?php
 $path_relative=".";
+require_once($path_relative."/functions/general.php");
+require_once($path_relative."/config.php");
 require_once($path_relative."/connect/db.php");
 // 	require("connect/db.php");
 // 	require("functions/email.php");

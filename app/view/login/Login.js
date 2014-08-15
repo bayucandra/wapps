@@ -1,0 +1,43 @@
+Ext.define('B.view.login.Login',{
+	extend:'Ext.window.Window',
+	requires:[
+		'B.view.login.LoginController'
+	],
+	id:'mail_login_window',
+	controller:'login',
+	bodyPadding:10,
+	title:'Login to '+app_detail.app_name,
+	closable:false,
+	items:{
+		xtype:'form',
+		defaults:{
+			xtype:'textfield',
+			labelWidth:70
+		},
+		items:[{
+			name:'username',
+			emptyText:'Email address',
+			fieldLabel:'Username',
+			allowBlank:false,
+			vtype:'email',
+			enableKeyEvents:true,
+			listeners:{
+				specialKey:'onSpecialKey'
+			}
+		},{
+			name:'password',
+			emptyText:'Password',
+			fieldLabel:'Password',
+			inputType:'password',
+			allowBlank:false,
+			enableKeyEvents:true,
+			listeners:{
+				specialKey:'onSpecialKey'
+			}
+		}]
+	},
+	buttons:[{
+		text:'Login',
+		handler:'onLogin'
+	}]
+}); 

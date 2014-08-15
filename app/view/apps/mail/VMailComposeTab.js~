@@ -1,4 +1,0 @@
-Ext.define('B.view.apps.mail.VMailCompose',{
-	extend:'Ext.tab.Panel',
-	alias:'widget.VMailCompose'
-}); 

@@ -3,6 +3,7 @@
  * Ext.application(). This is the ideal place to handle application launch and initialization
  * details.
  */
+Ext.Loader.setPath('Ext.ux','app/ux');
 Ext.define('B.Application', {
     extend: 'Ext.app.Application',
     
@@ -10,7 +11,7 @@ Ext.define('B.Application', {
 
     views: [
         // TODO: add views here
-	'apps.mail.VMail','apps.mail.VMailBox','apps.mail.VMailListTab', 'apps.mail.VMailComposeTab', 'apps.mail.VMailComposeTb'
+	'apps.mail.VMail','apps.mail.VMailTree','apps.mail.VMailInbox', 'apps.mail.VMailInboxList', 'apps.mail.VMailComposeTb'
 	,'menu.MenuMail'
     ],
 
@@ -21,7 +22,7 @@ Ext.define('B.Application', {
 
     stores: [
         // TODO: add stores here
-	'apps.mail.SMailBox'
+	'SMailInboxList'
     ],
     
     launch: function () {

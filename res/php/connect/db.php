@@ -1,4 +1,5 @@
 <?php
+/*
 	$path_relative=".";
 	if(isset($_SESSION["root_path"])){
 		require_once($_SESSION[SESSION_NM]['root_path'].'/res/php/config.php');
@@ -6,7 +7,7 @@
 	}else{//For CRUD and another purpose must include 'config.php' file at the relative path
 		require_once($path_relative.'/functions/general.php');
 		require_once($path_relative.'/config.php');
-	}
+	}*/
 	
 
 	$db_config=unserialize(MYSQL_CONFIG);

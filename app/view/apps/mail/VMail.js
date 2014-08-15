@@ -8,7 +8,7 @@ Ext.define('B.view.apps.mail.VMail',{
 	layout:'border',
 	items:[
 		{
-			xtype:'VMailBox',
+			xtype:'VMailTree',
 			region:'west',
 			width:200,
 			minWidth:100,
@@ -19,18 +19,20 @@ Ext.define('B.view.apps.mail.VMail',{
 			xtype: 'panel',
 			id:'panel_mail_content',
 			region:'center',
-			layout:'border',
+			layout:'fit',
 			items:[{
-					xtype:'VMailListTab',
-					id:'mail_list_tab',
-					region:'center',
-					minHeight:40
-				}],
-			tbar:[{
-					text:'Compose',
-					handler:'composeMail'
-				}
-     			]
+				xtype:'VMailInbox'
+			}]
+		},{
+			xtype:'panel',
+			id:'panel_mail_compose',
+			region:'south',
+			split:true,
+			collapsible:true,
+			collapsed:true,
+			collapseMode:'mini',
+			floatable:false,
+			title:'Compose Mail'
 		}
 	]
 });

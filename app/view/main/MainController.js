@@ -39,5 +39,8 @@ Ext.define('B.view.main.MainController', {
 				contentPanel.add(cmp);
 			}
 		}
+	},
+	logout:function(){
+		B.app.getController('Root').logout();
 	}
 });

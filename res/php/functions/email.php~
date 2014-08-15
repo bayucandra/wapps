@@ -1,3 +1,0 @@
-<?php
-	$mail=imap_open('{mail.allfromboatfurniture.com.com:110/pop3}','test@allfromboatfurniture.com','test');
-?>
