@@ -1,12 +1,13 @@
 <?php
 	session_start();
+	define("IS_ROOT", true);//FOR CHECKING IF IT MUST BE AN INCLUDE AND MAY NOT ACCESSED PARTIALLY
 	require("res/php/functions/general.php");
 	require("res/php/config.php");
 	$_SESSION[SESSION_NM]["root_path"]=getcwd();
-	require("res/php/connect/db.php");
-	require("res/php/classes/badmin.php");
-	$OBAdmin=new BAdmin($db);
-	$OBAdmin->logged_out_protect("login.php");
+// 	require("res/php/connect/db.php");
+// 	require("res/php/classes/badmin.php");
+// 	$OBAdmin=new BAdmin($db);//purge files later
+// 	$OBAdmin->logged_out_protect("login.php");//purge files later
 ?>
 <!DOCTYPE HTML>
 <html>
@@ -14,7 +15,21 @@
 	<meta charset="UTF-8">
 
 	<title>WApps</title>
+<!-- 	BEGIN JS GLOBAL VARS -->
+	<script type="text/javascript" src="res/js/bfunctions.js"></script>
+	<script type="text/javascript">
+		var app_detail=<?php echo json_encode(unserialize(APP_DETAIL));?>;
+		var loading_html='<img alt="Loading..." src="res/images/loading.gif" /><h3 style="color:#999999" class="farial">Loading...</h3>';
+		var compose_arr=[
+			{"subject":"--NO SUBJECT--","id":0,"content":""},
+			{"subject":"--NO SUBJECT--","id":15,"content":""}
+		];
+		var compose_idx=0;
+	</script>
+<!-- 	END JS GLOBAL VARS -->
 	<link rel="stylesheet" type="text/css" href="res/css/main.css"/>
+	<link rel="stylesheet" type="text/css" href="res/css/interface.css"/>
+	<script type="text/javascript" src="res/ckeditor/ckeditor.js"></script>
 
 	<!-- The line below must be kept intact for Sencha Cmd to build your application -->
 	<script type="text/javascript">var Ext=Ext||{};Ext.manifest="app";Ext=Ext||window.Ext||{};
@@ -40,18 +55,13 @@ e=!m&&!d;l=g["MSIE 10"];p=g.Blackberry||g.BB;t(q,n.loadPlatformsParam(),{phone:m
 d=k.length;for(e=0;e<d;e++)l=k[e].split(":")}return l},initPlatformTags:function(){n.detectPlatformTags()},getPlatformTags:function(){return n.platformTags},filterPlatform:function(d){d=[].concat(d);var m=n.getPlatformTags(),e,k,l;e=d.length;for(k=0;k<e;k++)if(l=d[k],m.hasOwnProperty(l))return!!m[l];return!1},init:function(){n.initPlatformTags();Ext.filterPlatform=n.filterPlatform},initManifest:function(d){n.init();d=d||Ext.manifest;"string"===typeof d&&(d=l.fetchSync(l.baseUrl+d+".json"),d=JSON.parse(d.content));
 return Ext.manifest=d},load:function(d){d=n.initManifest(d);var m=d.loadOrder,e=m?l.createLoadOrderMap(m):null,k=[],p=(d.js||[]).concat(d.css||[]),q,g,s,h,a=function(){u=!0;n.notify()};s=p.length;for(g=0;g<s;g++)q=p[g],h=!0,q.platform&&!n.filterPlatform(q.platform)&&(h=!1),h&&k.push(q.path);m&&(d.loadOrderMap=e);l.load({url:k,loadOrder:m,loadOrderMap:e,sequential:!0,success:a,failure:a})},onMicroloaderReady:function(d){u?d():p.push(d)},notify:function(){for(var d;d=p.shift();)d()}};return n}();
 Ext.manifest=Ext.manifest||"bootstrap";Ext.Microloader.load();</script>
-<!-- 	BEGIN JS GLOBAL VARS -->
-	<script type="text/javascript">
-		var app_detail=<?php echo json_encode(unserialize(APP_DETAIL));?>;
-	</script>
-<!-- 	END JS GLOBAL VARS -->
-	<script type="text/javascript" src="res/js/bfunctions.js"></script>
 
 </head>
-<body style="min-height:100%;">
-	<div style="margin-top:-70px;position:absolute;top:50%;width:95%;text-align:center;z-index:-999999;">
+<body style="min-height:100%;background-color:#f5f5f5">
+	<div id="wapps_loading" style="margin-top:-70px;position:absolute;top:50%;width:95%;text-align:center;z-index:-999999;">
 		<img src="res/images/loading.gif" alt="Loading..." />
 		<h3 style="color:#999999" class="farial">Loading...</h3>
 	</div>
+	<iframe name="bsaving" frameborder="0" width="0" height="0"></iframe>
 </body>
 </html>

@@ -8,17 +8,32 @@
 	require_once("classes/bcrud.php");
 
 	$OBCrud=new BCrud($db);
-	$section=$_REQUEST['section'];
-	$crud=$_REQUEST['crud'];
+	$section=$_REQUEST["section"];
+	$crud=null;
+	if(isset($_REQUEST["crud"]))
+		$crud=$_REQUEST["crud"];
 	
 	switch($section){
 		case "mail":
-			$idmail_account=$_SESSION[SESSION_NM]["idmail_account"];
-			$subsection=$_REQUEST['subsection'];
-			switch($subsection){
-				case "inbox":
-					$OBCrud->mail_inbox_list($idmail_account);
-					break;
+			if(isset($_SESSION[SESSION_NM]["idmail_account"])){
+				$idmail_account=$_SESSION[SESSION_NM]["idmail_account"];
+				$subsection=$_REQUEST["subsection"];
+				switch($subsection){
+					case "inbox":
+						$OBCrud->mail_inbox_list($idmail_account);
+						break;
+					case "attachment":
+						$idmail_box=$_REQUEST["idmail_box"];
+						$OBCrud->mail_attachment_list($idmail_box);
+						break;
+					case "addr_list":
+						$idmail_box=$_REQUEST["idmail_box"];
+						$OBCrud->mail_address_list($idmail_box);
+						break;
+					case "addr_book":
+						$OBCrud->generic_data('mail_address_book','idmail_account',$idmail_account);
+						break;
+				}
 			}
 			break;
 		case "mailbox":

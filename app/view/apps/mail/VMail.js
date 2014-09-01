@@ -3,6 +3,9 @@ Ext.define('B.view.apps.mail.VMail',{
 	requires:[
 		'B.view.apps.mail.MailController'
 	],
+	defaults:{
+		border:false
+	},
 	controller:'mail',
 	alias:'widget.VMail',
 	layout:'border',
@@ -20,6 +23,7 @@ Ext.define('B.view.apps.mail.VMail',{
 			id:'panel_mail_content',
 			region:'center',
 			layout:'fit',
+			border:false,
 			items:[{
 				xtype:'VMailInbox'
 			}]

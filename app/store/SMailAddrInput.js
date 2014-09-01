@@ -1,0 +1,13 @@
+Ext.define('B.store.SMailAddrInput',{
+	extend:'Ext.data.Store',
+	storeId:'SMailAddrInput',
+	data:{'items':[]},
+	fields:['contact_name','email_address'],
+	proxy:{
+		type:'memory',
+		reader:{
+			type:'json',
+			rootProperty:'items'
+		}
+	}
+}); 

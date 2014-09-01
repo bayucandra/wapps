@@ -1,9 +1,8 @@
 /**
  * The main application class. An instance of this class is created by app.js when it calls
  * Ext.application(). This is the ideal place to handle application launch and initialization
- * details.
+ * details.// Ext.Loader.setPath('Ext.ux','app/ux');
  */
-Ext.Loader.setPath('Ext.ux','app/ux');
 Ext.define('B.Application', {
     extend: 'Ext.app.Application',
     
@@ -11,18 +10,18 @@ Ext.define('B.Application', {
 
     views: [
         // TODO: add views here
-	'apps.mail.VMail','apps.mail.VMailTree','apps.mail.VMailInbox', 'apps.mail.VMailInboxList', 'apps.mail.VMailComposeTb'
+	'main.Main','apps.mail.VMail','apps.mail.VMailTree','apps.mail.VMailInbox', 'apps.mail.VMailInboxList','apps.mail.VMailAddr','apps.mail.VMailAttachment', 'apps.mail.VMailComposeTb', 'apps.mail.WMailAddrInput'
 	,'menu.MenuMail'
     ],
 
     controllers: [
-        'Root',
+        'Root'
         // TODO: add controllers here
     ],
 
     stores: [
         // TODO: add stores here
-	'SMailInboxList'
+	'SMailInboxList','SMailAddrInput','SMailAddrBook'
     ],
     
     launch: function () {

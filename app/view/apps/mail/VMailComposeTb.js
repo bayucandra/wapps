@@ -1,19 +1,23 @@
 Ext.define('B.view.apps.mail.VMailComposeTb',{
-	extend:'Ext.panel.Panel',
+	extend:'Ext.form.Panel',
 	alias:'widget.VMailComposeTb',
 	layout:'vbox',
 	bodyPadding:3,
+	border:false,
 	defaults:{
 		xtype:'textfield',
 		labelWidth:60
 	},
 	items:[
 		{
-			name:'to_addr',
+			name:'addr_to',
 			fieldLabel:'To',
-			width:'100%'
+			width:'100%',
+			listeners:{
+				focus:'mailAddrInput'
+			}
 		},{
-			name:'cc',
+			name:'addr_cc',
 			fieldLabel:'CC',
 			width:'100%'
 		},{
@@ -24,7 +28,15 @@ Ext.define('B.view.apps.mail.VMailComposeTb',{
 			width:'100%',
 			maxLength:100,
 			enforceMaxLength:true,
-			maxLengthText:'Subject field is limited to {0} of characters only'
+			maxLengthText:'Subject field is limited to {0} of characters only',
+			listeners:{
+				change:function(th,nv,ov,opts){
+					th.up('panel').up('panel').setTitle(this.titleGen(nv));
+				}
+			},
+			titleGen:function(p_str){
+				return Ext.util.Format.ellipsis(p_str,25);
+			}
 		},{
 			xtype:'panel',
 			defaults:{
@@ -32,6 +44,7 @@ Ext.define('B.view.apps.mail.VMailComposeTb',{
 				margin:'2 3 2 3'
 			},
 			layout:'hbox',
+			border:false,
 			items:[{
 					text:'Send',
 					handler:'mailComposeSend'

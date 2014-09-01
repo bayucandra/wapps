@@ -1,16 +1,21 @@
 Ext.define('B.view.apps.mail.VMailInbox',{
 	extend:'Ext.tab.Panel',
 	alias:'widget.VMailInbox',
-	defaults:{
-		bodyPadding:5
-	},
+	id:'vmail-inbox',
+	border:false,
 	layout:'fit',
 	items:[{
 		title:'Mail list',
+		border:false,
 		icon:'res/images/ui-icons/mail-list.png',
 		layout:'fit',
 		items:[{
 			xtype:'VMailInboxList'
 		}]
-	}]
+	}],
+	listeners:{
+		add:function(th,cmp,idx,opts){
+			th.setActiveTab(idx);
+		}
+	}
 }); 

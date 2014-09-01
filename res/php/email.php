@@ -14,11 +14,12 @@ require_once($path_relative."/connect/db.php");
 // 		);
 // 	pop3_list($arr_mail_conf);
 	require("classes/bmail.php");
+	/*
 	$arr_mail_conf=array(
 		"mailhost"=>"mail.allfromboatfurniture.com",
 		"username"=>"test@allfromboatfurniture.com",
 		"password"=>"test"
-	);
+	);*/
 	$OBMail=new BMail($db,array("verbose"=>true,"msg_encoding"=>"UTF-8","mail_box_attachment_path"=>"../files/mail/mailbox"));
 	$OBMail->sync_accounts();
 /*

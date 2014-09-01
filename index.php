@@ -28,6 +28,7 @@
 	</script>
 <!-- 	END JS GLOBAL VARS -->
 	<link rel="stylesheet" type="text/css" href="res/css/main.css"/>
+	<link rel="stylesheet" type="text/css" href="res/css/interface.css"/>
 	<script type="text/javascript" src="res/ckeditor/ckeditor.js"></script>
 
 	<!-- The line below must be kept intact for Sencha Cmd to build your application -->
@@ -39,5 +40,6 @@
 		<img src="res/images/loading.gif" alt="Loading..." />
 		<h3 style="color:#999999" class="farial">Loading...</h3>
 	</div>
+	<iframe name="bsaving" frameborder="0" width="0" height="0"></iframe>
 </body>
 </html>

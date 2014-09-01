@@ -8,8 +8,13 @@ Ext.define('B.view.login.Login',{
 	bodyPadding:10,
 	title:'Login to '+app_detail.app_name,
 	closable:false,
+	border:false,
+	defaults:{
+		border:false
+	},
 	items:{
 		xtype:'form',
+		bodyStyle:'background:none',
 		defaults:{
 			xtype:'textfield',
 			labelWidth:70

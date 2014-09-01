@@ -1,11 +1,13 @@
 Ext.define('B.view.apps.mail.MMailInboxList',{
 	extend:'Ext.data.Model',
 	fields:[
+		{name:'idmail_box',type:'int'},
 		{name:'addr_from',type:'string'},
 		{name:'subject',type:'string'},
 		{name:'message_date',type:'date',dateFormat:'Y-m-d H:i:s'},
 		{name:'message_plain',type:'string'},
 		{name:'message_html',type:'string'},
+		{name:'att_count',type:'int'}
 	],
 	proxy:{
 		type:'ajax',
@@ -17,7 +19,7 @@ Ext.define('B.view.apps.mail.MMailInboxList',{
 		},
 		reader:{
 			type:'json',
-			rootProperty:'records',
+			rootProperty:'records'
 		}
 	}
 });

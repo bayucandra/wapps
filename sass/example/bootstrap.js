@@ -1233,6 +1233,7 @@ Ext.Loader.addClassPathMappings({
   "Ext.app.bind": "../../ext/packages/sencha-core/src/app/bind",
   "Ext.browser": "../../ext/packages/sencha-core/src/env/Browser.js",
   "Ext.class": "../../ext/packages/sencha-core/src/class",
+  "Ext.classic": "../../ext/packages/ext-theme-classic/overrides",
   "Ext.data": "../../ext/packages/sencha-core/src/data",
   "Ext.direct": "../../ext/packages/sencha-core/src/direct",
   "Ext.dom": "../../ext/packages/sencha-core/src/dom",
@@ -1258,7 +1259,7 @@ Ext.Loader.addClassPathMappings({
   "Ext.scroll.Indicator": "../../ext/src/scroll/Indicator.js",
   "Ext.scroll.Manager": "../../ext/src/scroll/Manager.js",
   "Ext.supports": "../../ext/packages/sencha-core/src/env/Feature.js",
-  "Ext.theme": "../../ext/packages/ext-theme-crisp",
+  "Ext.theme": "../../ext/packages/ext-theme-classic",
   "Ext.util": "../../ext/packages/sencha-core/src/util",
   "Ext.util.Animate": "../../ext/src/util/Animate.js",
   "Ext.util.CSS": "../../ext/src/util/CSS.js",
@@ -1275,18 +1276,24 @@ Ext.Loader.addClassPathMappings({
   "Ext.util.Queue": "../../ext/src/util/Queue.js",
   "Ext.util.Renderable": "../../ext/src/util/Renderable.js",
   "Ext.util.StoreHolder": "../../ext/src/util/StoreHolder.js",
-  "Ext.ux.desktop.TrayClock": "../../ext/src/ux/desktop/TaskBar.js",
-  "ExtThemeNeptune": "../../ext/packages/ext-theme-neptune/overrides"
+  "Ext.ux.desktop.TrayClock": "../../ext/src/ux/desktop/TaskBar.js"
 });
 Ext.ClassManager.addNameAlternateMappings({
   "B.Application": [],
   "B.controller.Main": [],
   "B.controller.Root": [],
-  "B.store.apps.mail.SMailBox": [],
+  "B.store.SMailInboxList": [],
+  "B.view.apps.mail.MMailAttachment": [],
+  "B.view.apps.mail.MMailInboxList": [],
+  "B.view.apps.mail.MailController": [],
   "B.view.apps.mail.VMail": [],
-  "B.view.apps.mail.VMailBox": [],
-  "B.view.apps.mail.VMailCompose": [],
-  "B.view.apps.mail.VMailListTab": [],
+  "B.view.apps.mail.VMailAttachment": [],
+  "B.view.apps.mail.VMailComposeTb": [],
+  "B.view.apps.mail.VMailInbox": [],
+  "B.view.apps.mail.VMailInboxList": [],
+  "B.view.apps.mail.VMailTree": [],
+  "B.view.login.Login": [],
+  "B.view.login.LoginController": [],
   "B.view.main.Main": [],
   "B.view.main.MainController": [],
   "B.view.main.MainModel": [],
@@ -1376,6 +1383,7 @@ Ext.ClassManager.addNameAlternateMappings({
   "Ext.button.Split": [
     "Ext.SplitButton"
   ],
+  "Ext.classic.toolbar.Toolbar": [],
   "Ext.container.ButtonGroup": [
     "Ext.ButtonGroup"
   ],
@@ -2111,7 +2119,9 @@ Ext.ClassManager.addNameAlternateMappings({
     "Ext.TabPanel"
   ],
   "Ext.tab.Tab": [],
-  "Ext.theme.crisp.view.Table": [],
+  "Ext.theme.classic.grid.column.Widget": [],
+  "Ext.theme.classic.grid.plugin.Editing": [],
+  "Ext.theme.classic.toolbar.Breadcrumb": [],
   "Ext.tip.QuickTip": [
     "Ext.QuickTip"
   ],
@@ -2310,38 +2320,39 @@ Ext.ClassManager.addNameAlternateMappings({
   "Ext.window.Toast": [],
   "Ext.window.Window": [
     "Ext.Window"
-  ],
-  "ExtThemeNeptune.Component": [],
-  "ExtThemeNeptune.container.ButtonGroup": [],
-  "ExtThemeNeptune.form.field.HtmlEditor": [],
-  "ExtThemeNeptune.grid.RowEditor": [],
-  "ExtThemeNeptune.grid.column.RowNumberer": [],
-  "ExtThemeNeptune.layout.component.Dock": [],
-  "ExtThemeNeptune.menu.Menu": [],
-  "ExtThemeNeptune.menu.Separator": [],
-  "ExtThemeNeptune.panel.Panel": [],
-  "ExtThemeNeptune.panel.Table": [],
-  "ExtThemeNeptune.picker.Month": [],
-  "ExtThemeNeptune.resizer.Splitter": [],
-  "ExtThemeNeptune.toolbar.Paging": [],
-  "ExtThemeNeptune.toolbar.Toolbar": []
+  ]
 });
 Ext.ClassManager.addNameAliasMappings({
   "B.Application": [],
   "B.controller.Main": [],
   "B.controller.Root": [],
-  "B.store.apps.mail.SMailBox": [],
+  "B.store.SMailInboxList": [],
+  "B.view.apps.mail.MMailAttachment": [],
+  "B.view.apps.mail.MMailInboxList": [],
+  "B.view.apps.mail.MailController": [
+    "controller.mail"
+  ],
   "B.view.apps.mail.VMail": [
     "widget.VMail"
   ],
-  "B.view.apps.mail.VMailBox": [
-    "widget.VMailBox"
+  "B.view.apps.mail.VMailAttachment": [
+    "widget.VMailAttachment"
   ],
-  "B.view.apps.mail.VMailCompose": [
-    "widget.VMailCompose"
+  "B.view.apps.mail.VMailComposeTb": [
+    "widget.VMailComposeTb"
   ],
-  "B.view.apps.mail.VMailListTab": [
-    "widget.VMailListTab"
+  "B.view.apps.mail.VMailInbox": [
+    "widget.VMailInbox"
+  ],
+  "B.view.apps.mail.VMailInboxList": [
+    "widget.VMailInboxList"
+  ],
+  "B.view.apps.mail.VMailTree": [
+    "widget.VMailTree"
+  ],
+  "B.view.login.Login": [],
+  "B.view.login.LoginController": [
+    "controller.login"
   ],
   "B.view.main.Main": [
     "widget.app-main"
@@ -2454,6 +2465,7 @@ Ext.ClassManager.addNameAliasMappings({
   "Ext.button.Split": [
     "widget.splitbutton"
   ],
+  "Ext.classic.toolbar.Toolbar": [],
   "Ext.container.ButtonGroup": [
     "widget.buttongroup"
   ],
@@ -3406,7 +3418,9 @@ Ext.ClassManager.addNameAliasMappings({
   "Ext.tab.Tab": [
     "widget.tab"
   ],
-  "Ext.theme.crisp.view.Table": [],
+  "Ext.theme.classic.grid.column.Widget": [],
+  "Ext.theme.classic.grid.plugin.Editing": [],
+  "Ext.theme.classic.toolbar.Breadcrumb": [],
   "Ext.tip.QuickTip": [
     "widget.quicktip"
   ],
@@ -3666,26 +3680,11 @@ Ext.ClassManager.addNameAliasMappings({
   ],
   "Ext.window.Window": [
     "widget.window"
-  ],
-  "ExtThemeNeptune.Component": [],
-  "ExtThemeNeptune.container.ButtonGroup": [],
-  "ExtThemeNeptune.form.field.HtmlEditor": [],
-  "ExtThemeNeptune.grid.RowEditor": [],
-  "ExtThemeNeptune.grid.column.RowNumberer": [],
-  "ExtThemeNeptune.layout.component.Dock": [],
-  "ExtThemeNeptune.menu.Menu": [],
-  "ExtThemeNeptune.menu.Separator": [],
-  "ExtThemeNeptune.panel.Panel": [],
-  "ExtThemeNeptune.panel.Table": [],
-  "ExtThemeNeptune.picker.Month": [],
-  "ExtThemeNeptune.resizer.Splitter": [],
-  "ExtThemeNeptune.toolbar.Paging": [],
-  "ExtThemeNeptune.toolbar.Toolbar": []
+  ]
 });
 Ext.setVersion("ext", "5.0.0.970");
 Ext.setVersion("ext-theme-base", "5.0.0");
-Ext.setVersion("ext-theme-crisp", "5.0.0");
-Ext.setVersion("ext-theme-neptune", "5.0.0");
+Ext.setVersion("ext-theme-classic", "5.0.0");
 Ext.setVersion("ext-theme-neutral", "5.0.0");
 Ext.setVersion("sencha-core", "5.0.0");
 
@@ -3706,23 +3705,11 @@ Ext.Loader.loadScriptsSync([
   "../../ext/overrides/event/publisher/Gesture.js",
   "../../ext/overrides/Ext-more.js",
   "../../ext/overrides/Widget.js",
-  "../../ext/packages/ext-theme-neptune/overrides/Component.js",
-  "../../ext/packages/ext-theme-neptune/overrides/toolbar/Toolbar.js",
-  "../../ext/packages/ext-theme-neptune/overrides/layout/component/Dock.js",
-  "../../ext/packages/ext-theme-neptune/overrides/panel/Panel.js",
+  "../../ext/packages/ext-theme-classic/overrides/toolbar/Toolbar.js",
   "../../ext/overrides/app/Application.js",
-  "../../ext/packages/ext-theme-neptune/overrides/panel/Table.js",
-  "../../ext/packages/ext-theme-crisp/overrides/view/Table.js",
-  "../../ext/packages/ext-theme-neptune/overrides/resizer/Splitter.js",
-  "../../ext/packages/ext-theme-neptune/overrides/container/ButtonGroup.js",
-  "../../ext/packages/ext-theme-neptune/overrides/toolbar/Paging.js",
-  "../../ext/packages/ext-theme-neptune/overrides/picker/Month.js",
-  "../../ext/packages/ext-theme-neptune/overrides/form/field/HtmlEditor.js",
-  "../../ext/packages/ext-theme-neptune/overrides/grid/RowEditor.js",
-  "../../ext/packages/ext-theme-neptune/overrides/grid/column/RowNumberer.js",
-  "../../ext/packages/ext-theme-neptune/overrides/menu/Separator.js",
-  "../../ext/packages/ext-theme-neptune/overrides/menu/Menu.js",
-  "../../ext/packages/ext-theme-neptune/overrides/tab/Tab.js"
+  "../../ext/packages/ext-theme-classic/overrides/grid/column/Widget.js",
+  "../../ext/packages/ext-theme-classic/overrides/grid/plugin/Editing.js",
+  "../../ext/packages/ext-theme-classic/overrides/toolbar/Breadcrumb.js"
 ]);
 
 

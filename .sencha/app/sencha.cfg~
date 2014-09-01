@@ -32,7 +32,7 @@ app.resource.paths=${app.dir}/resources
 # conflicts with newer versions
 
 app.sass.namespace=${app.name}
-app.theme=ext-theme-classic
+app.theme=ext-theme-crisp
 
 app.framework.version=5.0.0.970
 app.cmd.version=5.0.0.160

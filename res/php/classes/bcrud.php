@@ -4,13 +4,17 @@ class BCrud{
 	public function __construct($p_db_PDO){
 		$this->db=$p_db_PDO;
 	}
+	private function log_insert($p_str){
+		log_insert($this->db,$p_str);
+	}
 	public function mail_inbox_list($p_idmail_account){
 		$json_result=array(
 			"success"=>false,
 			"records"=>array(),
 			"message"=>""
 		);
-		$qry_str_sel="SELECT mba.email_address AS addr_from, mb.subject,mb.message_date,mb.message_plain,mb.message_html
+		$qry_str_sel="SELECT mb.idmail_box,CONCAT(mba.personal,' &lt;',mba.email_address,'&gt;') AS addr_from, mb.subject,mb.message_date,mb.message_plain,mb.message_html
+				,(SELECT COUNT(*) FROM mail_box_attachments mbatt WHERE mbatt.idmail_box=mb.idmail_box) AS att_count
 			FROM mail_box mb
 				LEFT JOIN mail_box_type mbt
 					ON(mb.idmail_box_type=mbt.idmail_box_type)
@@ -25,11 +29,173 @@ class BCrud{
 		try{
 			$qry_sel->execute();
 			$json_result["success"]=true;
+			$tmp_records=$qry_sel->fetchAll(PDO::FETCH_ASSOC);
+			foreach($tmp_records as $record){
+				$tmp_record=array();
+				foreach($record as $key=>$col_val){
+					if($key=="message_html"){
+						if(!empty($col_val)){
+							$doc=new DOMDocument();
+							$doc->loadHTML($col_val);
+							$mock=new DOMDocument();
+							$body=$doc->getElementsByTagName('body')->item(0);
+							foreach($body->childNodes as $child){
+								$mock->appendChild($mock->importNode($child,true));
+							}
+							$tmp_record[$key]=$mock->saveHTML();
+						}else{
+							$tmp_record[$key]=$col_val;
+						}
+					}else{
+						$tmp_record[$key]=$col_val;
+					}
+				}
+				$json_result["records"][]=$tmp_record;
+			}
+// 			$json_result["records"]=$qry_sel->fetchAll(PDO::FETCH_ASSOC);
+		}catch(PDOException $e){
+			$json_result["success"]=false;
+			$json_result["message"]=$e->getMessage();
+		}
+		echo json_encode($json_result);
+	}
+	public function mail_address_list($p_idmail_box){
+		$json_result=array(
+			"success"=>true,
+			"addr_to"=>array(),
+			"addr_cc"=>array(),
+			"message"=>""
+		);
+// 		$is_to_addr_exist=false;
+		$qry_str_count_to="SELECT COUNT(*) FROM mail_box_addresses mba
+				LEFT JOIN mail_address_type mat
+					ON(mba.idmail_addr_type=mat.idmail_addr_type)
+			WHERE mba.idmail_box=$p_idmail_box
+				AND mat.description='to'";
+		$qry_count_to=$this->db->prepare($qry_str_count_to);
+		try{
+			$qry_count_to->execute();
+			$fn_count_to=$qry_count_to->fetch(PDO::FETCH_NUM);
+			if($fn_count_to[0]>0){
+				$qry_str_sel_to="SELECT mba.* FROM mail_box_addresses mba
+						LEFT JOIN mail_address_type mat
+							ON(mba.idmail_addr_type=mat.idmail_addr_type)
+					WHERE mba.idmail_box=$p_idmail_box
+						AND mat.description='to'";
+				$qry_sel_to=$this->db->prepare($qry_str_sel_to);
+				try{
+					$qry_sel_to->execute();
+// 					$is_to_addr_exist=true;
+// 					$html_to="<table class=\"inbox-header-tbl\"><tr><td class=\"label\">To</td>";
+// 					$str_addrs_to="";
+					while(($fa_sel_to=$qry_sel_to->fetch(PDO::FETCH_ASSOC))!==false){
+						if(!empty($fa_sel_to["personal"]))
+							$json_result["addr_to"][]=$fa_sel_to["personal"]." &lt;".$fa_sel_to["email_address"]."&gt;";
+						else
+							$json_result["addr_to"][]=$fa_sel_to["email_address"];
+					}
+// 					$str_addrs_to=substr($str_addrs_to,0,strlen($str_addrs_to)-2);
+// 					$html_to.="<td><div class=\"addr-wrapper\">".htmlentities($str_addrs_to)."</div></td>";
+// 					$html_to.="</tr>";
+// 					echo $html_to;
+				}catch(PDOException $e){
+					$json_result["success"]=false;
+					$json_result["message"].=$e->getMessage();
+				}
+			}
+		}catch(PDOException $e){
+			$json_result["success"]=false;
+			$json_result["message"].=$e->getMessage();
+		}
+		//BEGIN CC ADDRESS
+// 		$is_cc_addr_exist=false;
+		$qry_str_count_cc="SELECT COUNT(*) FROM mail_box_addresses mba
+				LEFT JOIN mail_address_type mat
+					ON(mba.idmail_addr_type=mat.idmail_addr_type)
+			WHERE mba.idmail_box=$p_idmail_box
+				AND mat.description='cc'";
+		$qry_count_cc=$this->db->prepare($qry_str_count_cc);
+		try{
+			$qry_count_cc->execute();
+			$fn_count_cc=$qry_count_cc->fetch(PDO::FETCH_NUM);
+			if($fn_count_cc[0]>0){
+				$qry_str_sel_cc="SELECT mba.* FROM mail_box_addresses mba
+						LEFT JOIN mail_address_type mat
+							ON(mba.idmail_addr_type=mat.idmail_addr_type)
+					WHERE mba.idmail_box=$p_idmail_box
+						AND mat.description='cc'";
+				$qry_sel_cc=$this->db->prepare($qry_str_sel_cc);
+				try{
+					$qry_sel_cc->execute();
+// 					$is_cc_addr_exist=true;
+// 					$html_cc="";
+// 					if(!$is_to_addr_exist)
+// 						$html_cc.="<table class=\"inbox-header-tbl\">";
+// 					$html_cc.="<tr><td class=\"label\">CC</td>";
+// 					$str_addrs_cc="";
+					while(($fa_sel_cc=$qry_sel_cc->fetch(PDO::FETCH_ASSOC))!==false){
+						if(!empty($fa_sel_cc["personal"]))
+							$json_result["addr_cc"][]=$fa_sel_cc["personal"]." &lt;".$fa_sel_cc["email_address"]."&gt;";
+						else
+							$json_result["addr_cc"][]=$fa_sel_cc["email_address"];
+					}
+// 					$str_addrs_cc=substr($str_addrs_cc,0,strlen($str_addrs_cc)-2);
+// 					$html_cc.="<td><div class=\"addr-wrapper\">".htmlentities($str_addrs_cc)."</div></td>";
+// 					$html_cc.="</tr>";
+// 					echo $html_cc;
+				}catch(PDOException $e){
+					$json_result["success"]=false;
+					$json_result["message"].=$e->getMessage();
+				}
+			}
+		}catch(PDOException $e){
+			$json_result["success"]=false;
+			$json_result["message"].=$e->getMessage();
+		}/*
+		if($is_to_addr_exist||$is_cc_addr_exist){
+			echo "</table>";
+		}*/
+		echo json_encode($json_result);
+		
+	}
+	public function mail_attachment_list($p_idmail_box){
+		$json_result=array(
+			"success"=>false,
+			"records"=>array(),
+			"message"=>""
+		);
+		$qry_str_sel="SELECT * FROM mail_box_attachments
+			WHERE idmail_box=$p_idmail_box";
+		$qry_sel=$this->db->prepare($qry_str_sel);
+		try{
+			$qry_sel->execute();
+			$json_result["success"]=true;
 			$json_result["records"]=$qry_sel->fetchAll(PDO::FETCH_ASSOC);
 		}catch(PDOException $e){
 			$json_result["success"]=false;
 			$json_result["message"]=$e->getMessage();
 		}
+		$this->log_insert(json_encode($json_result));
+		echo json_encode($json_result);
+	}
+	public function generic_data($p_table_str,$p_field_str,$p_cond_str){
+		$json_result=array(
+			"success"=>false,
+			"records"=>array(),
+			"message"=>""
+		);
+		$qry_str_sel="SELECT * FROM `$p_table_str`
+			WHERE `$p_field_str`=$p_cond_str";
+		$qry_sel=$this->db->prepare($qry_str_sel);
+		try{
+			$qry_sel->execute();
+			$json_result["success"]=true;
+			$json_result["records"]=$qry_sel->fetchAll(PDO::FETCH_ASSOC);
+		}catch(PDOException $e){
+			$json_result["success"]=false;
+			$json_result["message"]=$e->getMessage();
+		}
+		$this->log_insert(json_encode($json_result));
 		echo json_encode($json_result);
 	}
 /*	
@@ -111,12 +277,12 @@ class BCrud{
 		$qry_sel=$this->db->prepare($qry_str_sel);
 		try{
 			$qry_count->execute();
-			$fa_count=$qry_count->fetch(PDO::FETCH_NUM);
+			$fn_count=$qry_count->fetch(PDO::FETCH_NUM);
 			$qry_sel->execute();
 			$json_result=array(
 				'success' => true,
 				'news_list' => $qry_sel->fetchAll(PDO::FETCH_ASSOC),
-				'totalCount' => $fa_count[0]
+				'totalCount' => $fn_count[0]
 				
 			);
 			
@@ -150,13 +316,13 @@ class BCrud{
 		$qry_sel=$this->db->prepare($qry_str_sel);
 		try{
 			$qry_count->execute(array(":idjobs"=>$idjobs));
-			$fa_count=$qry_count->fetch(PDO::FETCH_NUM);
+			$fn_count=$qry_count->fetch(PDO::FETCH_NUM);
 			
 			$qry_sel->execute(array(":idjobs"=>$idjobs));
 			$json_result=array(
 				'success'=>true,
 				'recipient_of_news'=>$qry_sel->fetchAll(PDO::FETCH_ASSOC),
-				'totalCount' => $fa_count[0]
+				'totalCount' => $fn_count[0]
 			);
 		}catch(PDOException $e){
 			$json_result=array(
@@ -188,13 +354,13 @@ class BCrud{
 		$qry_sel=$this->db->prepare($qry_str_sel);
 		try{
 			$qry_count->execute();
-			$fa_count=$qry_count->fetch(PDO::FETCH_NUM);
+			$fn_count=$qry_count->fetch(PDO::FETCH_NUM);
 			
 			$qry_sel->execute();
 			$json_result=array(
 				'success'=>true,
 				'recipient_list'=>$qry_sel->fetchAll(PDO::FETCH_ASSOC),
-				'totalCount'=>$fa_count[0]
+				'totalCount'=>$fn_count[0]
 			);
 			return json_encode($json_result);
 		}catch(PDOException $e){

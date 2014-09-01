@@ -1,14 +1,12 @@
 /*
  * This file is generated and updated by Sencha Cmd. You can edit this file as
  * needed for your application, but these edits will have to be merged by
- * Sencha Cmd when upgrading.
+ * Sencha Cmd when upgrading. autoCreateViewport: 'B.view.main.Main'
  */
 Ext.application({
     name: 'B',
 
-    extend: 'B.Application',
-    
-//     autoCreateViewport: 'B.view.main.Main'
+    extend: 'B.Application'
 	
     //-------------------------------------------------------------------------
     // Most customizations should be made to B.Application. If you need to

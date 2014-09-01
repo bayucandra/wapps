@@ -18,12 +18,18 @@ Ext.define('B.view.main.Main', {
     layout: {
         type: 'border'
     },
+    defaults:{
+	    border:false
+	},
 
     items: [{
       xtype:'panel',
       region:'north',
       bodyStyle:{"background-color":"#DFE8F6"},
       bodyPadding: 2,
+      defaults:{
+	      border:false
+	},
       layout:'hbox',
       items:[{
 		xtype:'panel',
@@ -38,6 +44,7 @@ Ext.define('B.view.main.Main', {
 	}]
     },{
         xtype: 'panel',
+	border:true,
         title: 'Main menu',
         region: 'west',
         width: 200,
@@ -65,6 +72,7 @@ Ext.define('B.view.main.Main', {
 			items:[
 				{
 					header:false,
+					border:false,
 					xtype:'panel',
 					width:113,
 					height:113,
