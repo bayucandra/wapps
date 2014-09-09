@@ -1,0 +1,11 @@
+Ext.define('B.store.SMailComposeAtt',{
+	extend:'Ext.data.Store',
+	model:'B.view.apps.mail.MMailComposeAtt',
+	proxy:{
+		type:'memory',
+		reader:{
+			type:'json',
+			rootProperty:'records'
+		}
+	}
+}); 

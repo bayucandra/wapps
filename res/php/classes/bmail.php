@@ -1,14 +1,29 @@
 <?php
-$path_relative=".";
-require_once($path_relative."/functions/general.php");
-// require_once(../config.php);
+
+// require_once($path_relative."/functions/general.php");
+// require_once($path_relative."/config.php");
+// require_once($path_relative."/connect/db.php");
+if(!isset($php_mailer_path))
+	die("PHP mailer not included");
+require_once($php_mailer_path);
+
 b_set_time_zone("Asia/Jakarta");
-class BMail{
-	private $mbox,$db,$msg_encoding;
+class BMail extends PHPMailer{
+	private $mbox,$db,$msg_encoding,$arr_settings_server;
 	private $mail_account_arr,$is_verbose,$mail_box_attachment_path;
 	private $cur_message_idx_arr;//Array ( [0] => 2 [1] => 1 )
 	private $cur_msg_content_arr;//Array ("msg_html","msg_plain");
 	function __construct($p_db_PDO,$p_arr=array()){//$p_arr=array("verbose"=>true/false,"msg_encoding"=>"UTF-8 etc.","mail_box_attachment_path")
+		parent::__construct(true);
+		$this->db=$p_db_PDO;
+		
+		$this->arr_settings_server=$this->get_settings_server();
+		if(!$this->arr_settings_server){
+			$this->log_insert("Error when parsing system configuration from database server(constructor error)");
+			return false;
+		}
+		$this->set_email_conf();
+		
 		$this->is_verbose=false;
 		$this->cur_msg_content_arr_reset();
 		if(isset($p_arr)){
@@ -20,9 +35,79 @@ class BMail{
 				$this->mail_box_attachment_path=$p_arr["mail_box_attachment_path"];
 		}
 		
-		$this->db=$p_db_PDO;
 		$this->mbox=false;//INIT with false
-		$this->mail_account_arr=$this->get_mail_account_list();
+		if($this->is_verbose)
+			echo "<b>=========START CONSTRUCTOR=========</b></br><br/>";
+			
+			$this->mail_account_arr=$this->get_mail_account_list();
+			
+		if($this->is_verbose)
+			echo "<br/><b>*********END CONSTRUCTOR***********</b><br/>";
+	}
+	private function get_account_arr(){
+		$idmail_account=$_SESSION[SESSION_NM]["idmail_account"];
+		$qry_str_sel="SELECT * FROM `mail_account` WHERE idmail_account=$idmail_account LIMIT 1";
+		$qry_sel=$this->db->prepare($qry_str_sel);
+		try{
+			$qry_sel->execute();
+			$fa_sel=$qry_sel->fetch(PDO::FETCH_ASSOC);
+			$account_detail_arr=array("email"=>$fa_sel["email"],
+				"email_remote"=>$fa_sel["email_remote"],
+				"password"=>$fa_sel["password"]);
+			return $fa_sel["password"];
+		}catch(PDOException $e){
+			$this->log_insert("FUNCTION error get_password:".$e->getMessage());
+		}
+	}
+	public function send_mail(){
+		echo $this->get_password();
+	}
+	function error_handler($msg) {
+		print("My Site Error");
+		print("Description:");
+		printf("%s", $msg);
+		exit;
+	}
+	public function get_settings_server(){//Getting settings from database server
+		$qry_str_check_empty="SELECT COUNT(*) FROM `settings` WHERE value=''";
+		$qry_check_empty=$this->db->prepare($qry_str_check_empty);
+		try{
+			$qry_check_empty->execute();
+			$arr_check_empty=$qry_check_empty->fetch(PDO::FETCH_NUM);
+			if($arr_check_empty[0]>0){
+				$this->log_insert("Error!!!, there is configuration remain unset.");
+				return false;
+			}
+		}catch(PDOException $e){
+			$this->log_insert("There is error when checking for configuration empty:".$e->getMessage());
+			return false;
+		}
+		$qry_str_sel="SELECT * FROM `settings`";
+		$qry_sel=$this->db->prepare($qry_str_sel);
+		try{
+			$qry_sel->execute();
+			$arr_config_server_tmp=array();
+			while($fa_sel=$qry_sel->fetch(PDO::FETCH_ASSOC)){
+				$description=$fa_sel["description"];
+				$value=$fa_sel["value"];
+				$arr_config_server_tmp[$description]=$value;
+			}
+			return $arr_config_server_tmp;
+		}catch(PDOException $e){
+			$this->log_insert("Error when getting configurations from database server:".$e->getMessage());
+			return false;
+		}
+	}
+	private function set_email_conf(){
+		if(!$this->arr_settings_server){
+			$this->log_insert("Can't set_email_conf there is problem with arr_configs_server");
+			return false;
+		}
+		$this->IsSMTP();
+		
+		$this->SMTPAuth		= true;
+		$this->Host		= $_SERVER["HTTP_HOST"];
+		$this->Port		= $this->arr_settings_server['smtp_port'];
 	}
 	private function log_insert($p_str){
 		log_insert($this->db,$p_str);
@@ -60,9 +145,9 @@ class BMail{
 		$this->del_unfinished_mail();
 		$this->verbose("*FUNCTION sync_accounts()=>parsing database, param \$p_account_idx=$p_account_idx");
 		$idmail_account=$this->mail_account_arr[$p_account_idx]["idmail_account"];
-		$email=$this->mail_account_arr[$p_account_idx]["email"];
+		$email_remote=$this->mail_account_arr[$p_account_idx]["email_remote"];
 		$password=$this->mail_account_arr[$p_account_idx]["password"];
-		$this->mbox_init($email,$password);
+		$this->mbox_init($email_remote,$password);
 		$this->get_msg_idxs();//GET MESSAGE INDEXES ARRAY
 		$this->sync_mail($idmail_account);
 		//BEGIN RECURSION
@@ -97,7 +182,7 @@ class BMail{
 			$qry_ins_mail_box->execute();
 			if($qry_ins_mail_box->rowCount()==1){
 				$idmail_box=$this->db->lastInsertId();
-				$this->msgtodb($p_msg_idx,$idmail_box);
+				$this->msgtodb($p_idmail_account,$p_msg_idx,$idmail_box);
 				$this->mail_box_addresses_insert($idmail_box,$header_rfc822);
 			}
 		}catch(PDOException $e){
@@ -107,17 +192,17 @@ class BMail{
 		}
 		$this->verbose("*FUNCTION save_msg() => INSERTING message detail to DB. Message/Error:".$err_db_msg);
 	}
-	private function msgtodb($p_msg_idx,$p_idmail_box){
+	private function msgtodb($p_idmail_account,$p_msg_idx,$p_idmail_box){
 		$ifs=imap_fetchstructure($this->mbox,$p_msg_idx);
 		if(isset($ifs->parts)){
 			foreach($ifs->parts as $partno_idx=>$sub_part)
-				$this->msg_structure_parse($p_msg_idx,$p_idmail_box,$sub_part,$partno_idx+1);
+				$this->msg_structure_parse($p_idmail_account,$p_msg_idx,$p_idmail_box,$sub_part,$partno_idx+1);
 		}else{
-			$this->msg_structure_parse($p_msg_idx,$p_idmail_box,$ifs,0);
+			$this->msg_structure_parse($p_idmail_account,$p_msg_idx,$p_idmail_box,$ifs,0);
 		}
 		$this->msgtodb_save_text($p_idmail_box);
 	}
-	private function msg_structure_parse($p_msg_idx,$p_idmail_box,$p_ifs_objs,$p_partno){
+	private function msg_structure_parse($p_idmail_account,$p_msg_idx,$p_idmail_box,$p_ifs_objs,$p_partno){
 // 		$this->verbose("parsing part:".$p_partno);
 		$data=($p_partno)?
 			imap_fetchbody($this->mbox,$p_msg_idx,$p_partno):
@@ -143,7 +228,7 @@ class BMail{
 		if(isset($params["filename"])||isset($params["name"])){
 			$disposition=strtolower($p_ifs_objs->disposition);
 			$basename=(isset($params["filename"]))?$params["filename"]:$params["name"];
-			$this->save_attachment($data,$p_idmail_box,$basename,$disposition,$p_ifs_objs->type);
+			$this->save_attachment($data,$p_idmail_account,$p_idmail_box,$basename,$disposition,$p_ifs_objs->type);
 		}
 		//END ATTACHEMENTS***************
 		unset($data);//SAVE MEMORY BY DELETING $data
@@ -151,11 +236,11 @@ class BMail{
 		//RECURSION
 		if(isset($p_ifs_objs->parts)){
 			foreach($p_ifs_objs->parts as $partno2=>$ifs_objs2)
-				$this->msg_structure_parse($p_msg_idx,$p_idmail_box,$ifs_objs2,$p_partno.".".($partno2+1));
+				$this->msg_structure_parse($p_idmail_account,$p_msg_idx,$p_idmail_box,$ifs_objs2,$p_partno.".".($partno2+1));
 		}
 	}
-	private function save_attachment($p_data,$p_idmail_box,$p_basename,$p_disposition,$p_type){
-		$dst_path_base=$this->mail_box_attachment_path."/".$p_idmail_box;
+	private function save_attachment($p_data,$p_idmail_account,$p_idmail_box,$p_basename,$p_disposition,$p_type){
+		$dst_path_base=$this->mail_box_attachment_path."/".$p_idmail_account."/".$p_idmail_box;
 		if(!file_exists($dst_path_base)){
 			if(!mkdir($dst_path_base,0775,true))
 				return;
@@ -340,6 +425,27 @@ class BMail{
 			);*/
 		}
 	}
+	public function att_upload($p_files,$p_idmail_account,$p_panel_itemid){
+		ini_set("upload_max_filesize","20M");
+		ini_set("post_max_size","30M");
+		$json_result=array(
+			"success"=>true,
+			"message"=>"",
+			"file_name"=>""
+		);
+		$json_result["file_name"]=$p_files["file_attach"]["name"];
+		$dst_path_base=$this->mail_box_attachment_path."/".$p_idmail_account."/tmp_att"."/".$p_panel_itemid;
+		if(!file_exists($dst_path_base)){
+			if(!mkdir($dst_path_base,0775,true))
+				return;
+		}
+		$upload_path=$dst_path_base."/".$p_files["file_attach"]["name"];
+		$json_result["message"]=$upload_path;
+		if(!move_uploaded_file($p_files["file_attach"]["tmp_name"], $upload_path))
+			$json_result["success"]=false;
+		echo json_encode($json_result);
+	}
+/*
 	public function getmsg($p_idx){
 		if($this->check_conn())
 			return false;
@@ -349,17 +455,20 @@ class BMail{
 		$date_msg=new DateTime($header_rfc822->date);
 // 		echo $date_msg->format('Y-m-d H:i:s')."===".$header_rfc822->date."<br />";
 // 		echo $header_rfc822->from[0]->host."<br />";
-	}
+	}*/
+
+/*
 	public function parse_msg(){
 		$this->mbox_init("test@allfromboatfurniture.com","test");
 		$this->save_msg(1,5);
+
+// 		$data=imap_fetchbody($this->mbox,5,"1.2.1");
+// 		echo $data;
+
+// 		$ifs=imap_fetchstructure($this->mbox,5);
+// 		print_r($ifs);
+	}*/
 /*
-		$data=imap_fetchbody($this->mbox,5,"1.2.1");
-		echo $data;*/
-/*
-		$ifs=imap_fetchstructure($this->mbox,5);
-		print_r($ifs);*/
-	}
 	function fetch(){
 		$this->mbox_init("test@allfromboatfurniture.com","test");
 		if($this->check_conn()===false)
@@ -371,7 +480,7 @@ class BMail{
 				$this->getmsg($message_idx);
 			}
 		}
-	}
+	}*/
 	/*
 	function __destruct(){
 		if($this->mbox!==false)

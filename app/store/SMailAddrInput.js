@@ -2,7 +2,7 @@ Ext.define('B.store.SMailAddrInput',{
 	extend:'Ext.data.Store',
 	storeId:'SMailAddrInput',
 	data:{'items':[]},
-	fields:['contact_name','email_address'],
+	model:'B.view.apps.mail.MMailAddrInput',
 	proxy:{
 		type:'memory',
 		reader:{

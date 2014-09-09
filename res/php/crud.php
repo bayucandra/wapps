@@ -31,7 +31,9 @@
 						$OBCrud->mail_address_list($idmail_box);
 						break;
 					case "addr_book":
-						$OBCrud->generic_data('mail_address_book','idmail_account',$idmail_account);
+						$qry_cond="";
+						if(isset($_REQUEST["query"]))$qry_cond=$_REQUEST["query"];
+						$OBCrud->mail_address_book($idmail_account,$qry_cond);
 						break;
 				}
 			}

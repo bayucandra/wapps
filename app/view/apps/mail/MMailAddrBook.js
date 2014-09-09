@@ -1,9 +1,8 @@
 Ext.define('B.view.apps.mail.MMailAddrBook',{
 	extend:'Ext.data.Model',
 	fields:[
-		{name:'idmail_account',type:'int'},
-		{name:'person_name',type:'string'},
-		{name:'email',type:'string'}
+		{name:'addr',type:'string'},
+		{name:'val',type:'string'}
 	],
 	proxy:{
 		type:'ajax',
@@ -15,7 +14,8 @@ Ext.define('B.view.apps.mail.MMailAddrBook',{
 		},
 		reader:{
 			type:'json',
-			rootProperty:'records'
+			rootProperty:'records',
+			totalProperty:'totalCount'
 		}
 	}
 }); 

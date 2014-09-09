@@ -25,8 +25,12 @@
 	}
 	function user_login($p_db,$p_email,$p_password){
 		$ret_arr=array("idmail_account"=>-1,"error_msg"=>"");
-		$qry_count_str="SELECT COUNT(`idmail_account`) FROM `mail_account` WHERE `email`=:p_email";
-		$qry_sel_str="SELECT * FROM mail_account WHERE `email`=:p_email";
+		if(empty($p_email)||empty($p_password)){
+			$ret_arr["idmail_account"]="Please do not left empty Email/password";
+			return $ret_arr;
+		}
+		$qry_count_str="SELECT COUNT(`idmail_account`) FROM `mail_account` WHERE `email`=:p_email OR `email_remote`=:p_email";
+		$qry_sel_str="SELECT * FROM mail_account WHERE `email`=:p_email OR `email_remote`=:p_email";
 		$qry_sel=$p_db->prepare($qry_sel_str);
 		$qry_count=$p_db->prepare($qry_count_str);
 		try{

@@ -1282,16 +1282,22 @@ Ext.ClassManager.addNameAlternateMappings({
   "B.Application": [],
   "B.controller.Main": [],
   "B.controller.Root": [],
+  "B.store.SMailAddrBook": [],
+  "B.store.SMailAddrInput": [],
   "B.store.SMailInboxList": [],
+  "B.view.apps.mail.MMailAddrBook": [],
+  "B.view.apps.mail.MMailAddrInput": [],
   "B.view.apps.mail.MMailAttachment": [],
   "B.view.apps.mail.MMailInboxList": [],
   "B.view.apps.mail.MailController": [],
   "B.view.apps.mail.VMail": [],
+  "B.view.apps.mail.VMailAddr": [],
   "B.view.apps.mail.VMailAttachment": [],
   "B.view.apps.mail.VMailComposeTb": [],
   "B.view.apps.mail.VMailInbox": [],
   "B.view.apps.mail.VMailInboxList": [],
   "B.view.apps.mail.VMailTree": [],
+  "B.view.apps.mail.WMailAddrInput": [],
   "B.view.login.Login": [],
   "B.view.login.LoginController": [],
   "B.view.main.Main": [],
@@ -2326,7 +2332,11 @@ Ext.ClassManager.addNameAliasMappings({
   "B.Application": [],
   "B.controller.Main": [],
   "B.controller.Root": [],
+  "B.store.SMailAddrBook": [],
+  "B.store.SMailAddrInput": [],
   "B.store.SMailInboxList": [],
+  "B.view.apps.mail.MMailAddrBook": [],
+  "B.view.apps.mail.MMailAddrInput": [],
   "B.view.apps.mail.MMailAttachment": [],
   "B.view.apps.mail.MMailInboxList": [],
   "B.view.apps.mail.MailController": [
@@ -2334,6 +2344,9 @@ Ext.ClassManager.addNameAliasMappings({
   ],
   "B.view.apps.mail.VMail": [
     "widget.VMail"
+  ],
+  "B.view.apps.mail.VMailAddr": [
+    "widget.VMailAddr"
   ],
   "B.view.apps.mail.VMailAttachment": [
     "widget.VMailAttachment"
@@ -2349,6 +2362,9 @@ Ext.ClassManager.addNameAliasMappings({
   ],
   "B.view.apps.mail.VMailTree": [
     "widget.VMailTree"
+  ],
+  "B.view.apps.mail.WMailAddrInput": [
+    "widget.WMailAddrInput"
   ],
   "B.view.login.Login": [],
   "B.view.login.LoginController": [

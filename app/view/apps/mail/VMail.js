@@ -31,6 +31,7 @@ Ext.define('B.view.apps.mail.VMail',{
 			xtype:'panel',
 			id:'panel_mail_compose',
 			region:'south',
+			layout:'fit',
 			split:true,
 			collapsible:true,
 			collapsed:true,

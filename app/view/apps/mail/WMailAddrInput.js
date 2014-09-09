@@ -1,9 +1,13 @@
 Ext.define('B.view.apps.mail.WMailAddrInput',{
 	extend:'Ext.window.Window',
+	requires:[
+		'B.view.apps.mail.MailController'
+	],
+	controller:'mail',
 	closeAction:'hide',
 	id:'mail_addr_input',
 	border:false,
-	header:false,
+	title:'Email address input',
 	layout:'fit',
 	modal:true,
 	width:400,
@@ -21,7 +25,14 @@ Ext.define('B.view.apps.mail.WMailAddrInput',{
 			items:[
 				Ext.create('Ext.grid.RowNumberer'),
 				{text:'Email address',dataIndex:'email_address',flex:7},
-				{text:'Contact Name',dataIndex:'contact_name',flex:3}
+				{text:'Contact Name',dataIndex:'contact_name',flex:3},
+				{xtype:'actioncolumn',width:30,sortable:false,menuDisabled:true,
+					items:[{
+						icon:'res/images/btn-icons/def_delete.png',
+						tooltip:'Delete email address',
+						handler:'mailAddrBookInputDel'
+					}]
+				}
 			]
 		},
 		store:'SMailAddrInput'
@@ -37,29 +48,61 @@ Ext.define('B.view.apps.mail.WMailAddrInput',{
 			cls:'def_btn_new'
 		},{
 			xtype:'combo',
-			name:'person_name',
-			flex:7,
+			inputId:'inp_to_addr',
+			typeAhead:true,
+			hideLabel:true,
+			hideTrigger:true,
+			minChars:2,
+			name:'rfc822_addr',
+			flex:1,
 			store:'SMailAddrBook',
-			valueField:'person_name',
-			displayField:'person_name'
-		},{
-			xtype:'combo',
-			name:'email',
-			flex:3,
-			store:'SMailAddrBook',
-			valueField:'email',
-			displayField:'email'
+			displayField:'val',
+			emptyText:'Input an email address then ENTER 2x',
+			listConfig:{
+				getInnerTpl:function(){
+					return '{addr}';
+				}
+			},
+			listeners:{
+				specialKey:'inpEnter'
+			},
+			pageSize:extjs_conf.addrs_book_page_size
 		}]
 	}],
 	listeners:{
 		show:function(th,opts){
-			var arr_rfc822_addrs=th.obj_input.getValue().split(',');
 			var store_items=[];
-			for(var i=0;i<arr_rfc822_addrs.length;i++){
-				var arr_rfc822_addr=addr_rfc822_parsing(arr_rfc822_addrs[i]);
-				store_items.push(arr_rfc822_addr);
+			var input_value=th.obj_input.getValue();
+			if(!bisnull(input_value)){
+				var arr_rfc822_addrs=input_value.split(',');
+				for(var i=0;i<arr_rfc822_addrs.length;i++){
+					var arr_rfc822_addr=addr_rfc822_parsing(arr_rfc822_addrs[i]);
+					store_items.push(arr_rfc822_addr);
+				}
 			}
 			Ext.getStore('SMailAddrInput').loadData(store_items);
+			th.down('form').reset();
+			var field_label=th.obj_input.getFieldLabel();
+			th.setTitle('\''+field_label+'\''+' email addresses input');
+			th.center();
+		},
+		beforehide:function(th,opts){
+			var rfc822_addrs_arr=[];
+			Ext.getStore('SMailAddrInput').each(function(record,id){
+				var rfc822_addr_str=record.get('email_address');
+				if(!bisnull(record.get('contact_name'))){
+					rfc822_addr_str=record.get('contact_name')+' <'+rfc822_addr_str+'>';
+				}
+				rfc822_addrs_arr[rfc822_addrs_arr.length]=rfc822_addr_str;
+			});
+			rfc822_addrs_arr.reverse();
+			
+			var rfc822_addrs_str='';
+			for(var i=0;i<rfc822_addrs_arr.length;i++){
+				rfc822_addrs_str=rfc822_addrs_str+rfc822_addrs_arr[i]+',';
+			}
+			rfc822_addrs_str=rfc822_addrs_str.substring(0,rfc822_addrs_str.length-1);
+			th.obj_input.setValue(rfc822_addrs_str);
 		},
 		blur:function(th,evt,opts){
 			Ext.Msg.alert('Tst','Focus');

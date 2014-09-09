@@ -94,10 +94,11 @@ Ext.define('B.view.apps.mail.VMailInboxList',{
 								text:'Reply',
 								handler:'composeMail'
 							},{
-								text:'Reply All'
+								text:'Reply All',
+								handler:'notImplemented'
 							},{
 								text:'Forward',
-								handler:'mailAddrInput'
+								handler:'notImplemented'
 							}]
 						},{
 							xtype:'VMailAddr',

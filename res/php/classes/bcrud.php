@@ -175,7 +175,6 @@ class BCrud{
 			$json_result["success"]=false;
 			$json_result["message"]=$e->getMessage();
 		}
-		$this->log_insert(json_encode($json_result));
 		echo json_encode($json_result);
 	}
 	public function generic_data($p_table_str,$p_field_str,$p_cond_str){
@@ -195,7 +194,52 @@ class BCrud{
 			$json_result["success"]=false;
 			$json_result["message"]=$e->getMessage();
 		}
-		$this->log_insert(json_encode($json_result));
+		echo json_encode($json_result);
+	}
+	public function mail_address_book($p_idmail_account,$qry_cond){
+		$json_result=array(
+			"success"=>false,
+			"records"=>array(),
+			"message"=>"",
+			"totalCount"=>0
+		);
+		
+		$page=$_REQUEST['page'];$start=$_REQUEST['start'];$limit=$_REQUEST['limit'];
+		$qry_str_sel="SELECT * FROM `mail_address_book`
+			WHERE `idmail_account`=$p_idmail_account
+				AND ((person_name LIKE '%$qry_cond%') OR (email LIKE '%$qry_cond%'))
+			ORDER BY email ASC
+			LIMIT $start,$limit";
+		$qry_sel=$this->db->prepare($qry_str_sel);
+		try{
+			$qry_sel->execute();
+			$json_result["success"]=true;
+// 			$json_result["records"]=$qry_sel->fetchAll(PDO::FETCH_ASSOC);
+			$tmp_records=$qry_sel->fetchAll(PDO::FETCH_ASSOC);
+			foreach($tmp_records as $record){
+				$rfc822_addr_str=$record["email"];
+				$rfc822_addr_str_html=$record["email"];
+				if(!empty($record["person_name"])){
+					$rfc822_addr_str=$record["person_name"]." <".$record["email"].">";
+					$rfc822_addr_str_html="<b>".$record["person_name"]."</b> &lt;".$record["email"]."&gt;";
+				}
+				$json_result["records"][]=array("addr"=>$rfc822_addr_str_html,"val"=>$rfc822_addr_str);
+			}
+		}catch(PDOException $e){
+			$json_result["success"]=false;
+			$json_result["message"]=$e->getMessage();
+		}
+		$qry_str_count="SELECT COUNT(idmail_account) FROM `mail_address_book`
+			WHERE `idmail_account`=$p_idmail_account
+				AND ((person_name LIKE '%$qry_cond%') OR (email LIKE '%$qry_cond%'))";
+		$qry_count=$this->db->prepare($qry_str_count);
+		try{
+			$qry_count->execute();
+			$fn_count=$qry_count->fetch(PDO::FETCH_NUM);
+			$json_result["totalCount"]=$fn_count[0];
+		}catch(PDOException $e){
+			$this->log_insert("error function : mail_address_book()".$e->getMessage());
+		}
 		echo json_encode($json_result);
 	}
 /*	

@@ -40,8 +40,9 @@ Ext.define('B.view.apps.mail.MailController',{
 			is_init_tab_empty=true;
 			mail_compose_tab=Ext.create('Ext.tab.Panel',{
 				id:'mail_compose_tab',
-				border:0,
+				border:false,
 				tabPosition:'right',
+				titleAlign:'left',
 				tabRotation:0
 			});
 			mail_compose_tab.on("add","tabAdd");
@@ -55,7 +56,7 @@ Ext.define('B.view.apps.mail.MailController',{
 		}
 		var compose_operation={};
 		if(btn.getText()==='Reply'){
-			var panel_reader=btn.up('panel').up('panel').up('panel');
+			var panel_reader=btn.up('panel[itemId^=id]');
 			var reader_tab_itemId=panel_reader.getItemId();
 			var msg=panel_reader.msg;
 			compose_operation={'operation':'reply','ref_itemId':reader_tab_itemId,'msg':msg};
@@ -94,20 +95,31 @@ Ext.define('B.view.apps.mail.MailController',{
 			mail_compose_tab.setActiveTab(reply_exist_pos);
 		}else{
 			compose_idx++;//GLOBAL VARIABLE, increase only when create new compose tab
+			var item_id='mail_compose_tab_'+compose_idx.toString();
 			mail_compose_tab.add({
 				xtype:'panel',
 				operation:operation,
 				ref_itemId:ref_itemId,
-				title:"-NO SUBJECT-"+compose_idx.toString(),
-				itemId:'mail_compose_tab_'+compose_idx.toString(),
-				layout:'hbox',
+				title:'-NO SUBJECT-'+compose_idx.toString(),
+				itemId:item_id,
+				layout:{type:'hbox',align:'stretch'},
 				items:[{
-					xtype:'VMailComposeTb',
-					width:'30%'
+					xtype:'panel',
+					flex:3,
+					layout:'vbox',
+					items:[{
+						xtype:'VMailComposeTb',
+						width:'100%',
+						flex:4
+					},{
+						xtype:'VMailComposeAtt',
+						compose_itemId:item_id,
+						width:'100%',
+						flex:6
+					}]
 				},{
 					xtype:'panel',
-					width:'70%',
-					flex:0,
+					flex:7,
 					html:'<div id="mail_compose_tab_'+compose_idx.toString()+'">'+msg+'</div>'
 				}],
 				closable:true,
@@ -180,7 +192,10 @@ Ext.define('B.view.apps.mail.MailController',{
 		var panel_container=btn.up('panel[itemId^=mail_compose_tab_]');
 		var tab_itemId=panel_container.getItemId();
 		var ckeditor_val=CKEDITOR.instances[tab_itemId].getData();
-		alert(ckeditor_val);
+		
+		var bdz_id='bdz_'+tab_itemId;
+		var bdz_obj=Dropzone.forElement('div#'+bdz_id);
+		alert(bdz_obj.getAcceptedFiles()[1].size);
 	},
 	mailComposeTabBeforeClose:function(pnl){
 		var itemId=pnl.getItemId();
@@ -188,12 +203,67 @@ Ext.define('B.view.apps.mail.MailController',{
 			CKEDITOR.instances[itemId].destroy();
 		}
 	},
-	mailAddrInput:function(p_obj_input,evt,opts){
+	mailAddrInputUI:function(p_obj_input,evt,opts){
 		var mail_addr_input=Ext.getCmp('mail_addr_input');
 		if(bisnull(mail_addr_input)){
 			mail_addr_input=Ext.create('B.view.apps.mail.WMailAddrInput');
 		}
 		mail_addr_input.setObjInput(p_obj_input);
 		mail_addr_input.show();
+	},
+	inpEnter:function(field,e){
+		if(e.getKey()===e.ENTER){
+			switch(field.getInputId()){
+				case 'inp_to_addr':
+					this.mailAddrBookInputAdd(field);
+					break;
+			}
+		}
+	},
+	mailAddrBookInputAdd:function(p_field_ref){
+		var str_addr=p_field_ref.getValue();
+		if((str_addr==='')||(bisnull(str_addr))){
+			return;
+		}
+		var arr_rfc822_addr=addr_rfc822_parsing(str_addr);
+// 		Ext.Msg.alert('MSG',p_str_addr+'===='+arr_rfc822_addr['contact_name']+'====='+arr_rfc822_addr['email_address']);
+		if(arr_rfc822_addr['email_address']===''){
+			Ext.Msg.show({
+				title:'Error',
+				message:'Please input correct email address format',
+				buttons:Ext.Msg.OK,
+				icon:Ext.Msg.ERROR
+			});
+			return;
+		}
+		
+		var rec=new B.view.apps.mail.MMailAddrInput({
+			contact_name:arr_rfc822_addr['contact_name'],
+			email_address:arr_rfc822_addr['email_address']
+		});
+		var grid_addresses=Ext.getCmp('mail_addr_input').getComponent('grid_addresses');
+		if(grid_addresses.getStore().findRecord('email_address',arr_rfc822_addr['email_address'])===null)
+			grid_addresses.getStore().insert(0,rec);
+		else
+			Ext.Msg.show({
+				title:'Error',
+				message:'Email address already exist at record list',
+				buttons:Ext.Msg.OK,
+				icon:Ext.Msg.ERROR
+			});
+		p_field_ref.setValue('');
+	},
+	mailAddrBookInputDel:function(grid, rowIndex){
+		grid.getStore().removeAt(rowIndex);
+	},mailSaveDraft:function(){
+		
+	},
+	notImplemented:function(){
+		Ext.Msg.show({
+			title:'Not implemented',
+			message:'Sorry, Handler function not implemented yet',
+			buttons:Ext.Msg.OK,
+			icon:Ext.Msg.ERROR
+		});
 	}
 }); 

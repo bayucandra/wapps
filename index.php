@@ -16,19 +16,25 @@
 
 	<title>WApps</title>
 <!-- 	BEGIN JS GLOBAL VARS -->
+	<script type="text/javascript" src="res/js/dropzone.js"></script>
 	<script type="text/javascript" src="res/js/bfunctions.js"></script>
 	<script type="text/javascript">
+		Dropzone.autoDiscover = false;
 		var app_detail=<?php echo json_encode(unserialize(APP_DETAIL));?>;
-		var loading_html='<img alt="Loading..." src="res/images/loading.gif" /><h3 style="color:#999999" class="farial">Loading...</h3>';
+		var loading_html='<img alt="Loading..." src="res/images/loading.gif" /><h3 style="color:#999999" class="farial">Loading...</h3>';/*
 		var compose_arr=[
 			{"subject":"--NO SUBJECT--","id":0,"content":""},
 			{"subject":"--NO SUBJECT--","id":15,"content":""}
-		];
+		];*/
 		var compose_idx=0;
+		var extjs_conf={
+			addrs_book_page_size:10
+		};
 	</script>
 <!-- 	END JS GLOBAL VARS -->
 	<link rel="stylesheet" type="text/css" href="res/css/main.css"/>
 	<link rel="stylesheet" type="text/css" href="res/css/interface.css"/>
+	<link rel="stylesheet" type="text/css" href="res/css/dz/dropzone.css"/>
 	<script type="text/javascript" src="res/ckeditor/ckeditor.js"></script>
 
 	<!-- The line below must be kept intact for Sencha Cmd to build your application -->

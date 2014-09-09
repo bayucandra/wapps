@@ -21,6 +21,7 @@
 	));
 	define("ADMIN_UID",0);
 	define("PATH_SMARTY","res/php/smarty/libs/Smarty.class.php");
+	define("PHP_MAILER_FOLDER","PHPMailer-5.2.8");
 	define("PATH_TEMPLATE","res/php/tpl");
 	define("ENC_PASSWORD","plain");
 	define("SESSION_NM","WAPPS_ADMIN");

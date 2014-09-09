@@ -1,27 +1,30 @@
 <?php
+session_start();
 $path_relative=".";
 require_once($path_relative."/functions/general.php");
 require_once($path_relative."/config.php");
 require_once($path_relative."/connect/db.php");
-// 	require("connect/db.php");
-// 	require("functions/email.php");
-// 	$arr_mail_conf=array(
-// 			"hostname"=>"mail.allfromboatfurniture.com",
-// 			"port"=>110,
-// 			"tls"=>0,
-// 			"user"=>"test@allfromboatfurniture.com",
-// 			"password"=>"test"
-// 		);
-// 	pop3_list($arr_mail_conf);
-	require("classes/bmail.php");
-	/*
-	$arr_mail_conf=array(
-		"mailhost"=>"mail.allfromboatfurniture.com",
-		"username"=>"test@allfromboatfurniture.com",
-		"password"=>"test"
-	);*/
-	$OBMail=new BMail($db,array("verbose"=>true,"msg_encoding"=>"UTF-8","mail_box_attachment_path"=>"../files/mail/mailbox"));
-	$OBMail->sync_accounts();
+$php_mailer_path=$path_relative."/".PHP_MAILER_FOLDER."/class.phpmailer.php";
+require("classes/bmail.php");
+	if(isset($_REQUEST["section"])){
+		$idmail_account=$_SESSION[SESSION_NM]["idmail_account"];
+		$OBMail=new BMail($db,array("verbose"=>true,"msg_encoding"=>"UTF-8","mail_box_attachment_path"=>"../files/mail/mailbox"));
+		switch($_REQUEST["section"]){
+			case "sync_accounts":
+				$OBMail->sync_accounts();
+				break;
+			case "upload_att":/*
+				print_r($_REQUEST);
+				print_r($_FILES);*/
+				$OBMail->att_upload($_FILES,$idmail_account,$_REQUEST["compose_itemId"]);
+				break;
+			case "test":
+				$OBMail->send_mail();
+				break;
+		}
+	}else{
+		die("Parameter not set properly");
+	}
 /*
 stdClass Object ( 
 	[type] => 0 

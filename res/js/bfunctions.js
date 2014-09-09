@@ -29,24 +29,40 @@ function arr_max(p_arr){
 	}
 	return max_val;
 }
+function mail_addr_is_valid(p_mail_str){
+	var reg = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+	return reg.test(p_mail_str);
+}
 function addr_rfc822_htmldecode(p_str){
+	if(p_str==='')
+		return '';
 	var tmp_str=p_str.replace(/&lt;/g,'<');
 	tmp_str=tmp_str.replace(/&gt;/g,'>');
 	return tmp_str;
 }
 function addr_rfc822_parsing(p_str){
+	if(p_str==='')
+		return '';
 	var rfc822_addr_str_raw=addr_rfc822_htmldecode(p_str);
 	var rfc822_addr_str=rfc822_addr_str_raw.trim();
 	var split_lt_str=rfc822_addr_str.split('<');
 	var arr_refine={contact_name:'',email_address:''};
-	for(var i=0;i<split_lt_str.length;i++){
-		if(i==0){
-			var str_contact_name=split_lt_str[i].trim();
-			arr_refine.contact_name=str_contact_name;
-		}else{
-			var str_email_address=split_lt_str[i].replace('>','');
-			arr_refine.email_address=str_email_address.trim();
+	if(split_lt_str.length==1){
+		arr_refine.email_address=rfc822_addr_str;
+	}else{
+		for(var i=0;i<split_lt_str.length;i++){
+			if(i==0){
+				var str_contact_name=split_lt_str[i].trim();
+				arr_refine.contact_name=str_contact_name;
+			}else{
+				var str_email_address=split_lt_str[i].replace('>','');
+				arr_refine.email_address=str_email_address.trim();
+			}
 		}
+	}
+	if(!mail_addr_is_valid(arr_refine.email_address)){//IF the email address is not valid. Then make return all to empty ('')
+		arr_refine.contact_name='';
+		arr_refine.email_address='';
 	}
 	return arr_refine;
 }

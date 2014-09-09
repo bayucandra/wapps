@@ -1,7 +1,6 @@
 Ext.define('B.view.apps.mail.VMailComposeTb',{
 	extend:'Ext.form.Panel',
 	alias:'widget.VMailComposeTb',
-	layout:'vbox',
 	bodyPadding:3,
 	border:false,
 	defaults:{
@@ -14,12 +13,15 @@ Ext.define('B.view.apps.mail.VMailComposeTb',{
 			fieldLabel:'To',
 			width:'100%',
 			listeners:{
-				focus:'mailAddrInput'
+				focus:'mailAddrInputUI'
 			}
 		},{
 			name:'addr_cc',
 			fieldLabel:'CC',
-			width:'100%'
+			width:'100%',
+			listeners:{
+				focus:'mailAddrInputUI'
+			}
 		},{
 			xtype:'textarea',
 			name:'subject',
@@ -31,29 +33,23 @@ Ext.define('B.view.apps.mail.VMailComposeTb',{
 			maxLengthText:'Subject field is limited to {0} of characters only',
 			listeners:{
 				change:function(th,nv,ov,opts){
-					th.up('panel').up('panel').setTitle(this.titleGen(nv));
+					var title=nv;
+					if(bisnull(nv))
+						title='-NO SUBJECT-';
+					th.up('panel').up('panel').up('panel').setTitle(this.titleGen(title));
 				}
 			},
 			titleGen:function(p_str){
 				return Ext.util.Format.ellipsis(p_str,25);
 			}
-		},{
-			xtype:'panel',
-			defaults:{
-				xtype:'button',
-				margin:'2 3 2 3'
-			},
-			layout:'hbox',
-			border:false,
-			items:[{
-					text:'Send',
-					handler:'mailComposeSend'
-				},{
-					text:'Save draft'
-				},{
-					text:'Cancel'
-				
-			}]
 		}
-	]
+	],
+	tbar:[{
+			text:'Send',
+			handler:'mailComposeSend'
+		},{
+			text:'Save draft'
+		},{
+			text:'Cancel'
+	}]
 }); 
