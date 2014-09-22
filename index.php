@@ -16,10 +16,8 @@
 
 	<title>WApps</title>
 <!-- 	BEGIN JS GLOBAL VARS -->
-	<script type="text/javascript" src="res/js/dropzone.js"></script>
 	<script type="text/javascript" src="res/js/bfunctions.js"></script>
 	<script type="text/javascript">
-		Dropzone.autoDiscover = false;
 		var app_detail=<?php echo json_encode(unserialize(APP_DETAIL));?>;
 		var loading_html='<img alt="Loading..." src="res/images/loading.gif" /><h3 style="color:#999999" class="farial">Loading...</h3>';/*
 		var compose_arr=[

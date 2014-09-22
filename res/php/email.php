@@ -8,10 +8,25 @@ $php_mailer_path=$path_relative."/".PHP_MAILER_FOLDER."/class.phpmailer.php";
 require("classes/bmail.php");
 	if(isset($_REQUEST["section"])){
 		$idmail_account=$_SESSION[SESSION_NM]["idmail_account"];
-		$OBMail=new BMail($db,array("verbose"=>true,"msg_encoding"=>"UTF-8","mail_box_attachment_path"=>"../files/mail/mailbox"));
+		$OBMail=new BMail($db,array("verbose"=>false,"msg_encoding"=>"UTF-8","mail_box_attachment_path"=>"../files/mail/mailbox"));
 		switch($_REQUEST["section"]){
 			case "sync_accounts":
 				$OBMail->sync_accounts();
+				break;
+			case "send_mail":
+				$att_json_str=stripslashes($_REQUEST['att_json']);
+				$att_json_arr=json_decode($att_json_str,true);
+//				print_r($_REQUEST);
+				$OBMail->send_mail(array(
+					"idmail_account"=>$idmail_account,
+					"addr_to_csv" => $_REQUEST["addr_to_csv"], 
+					"addr_cc_csv" => $_REQUEST["addr_cc_csv"],
+					"subject" => $_REQUEST["subject"],
+					"message"=>$_REQUEST["msg"],
+					"att_json_arr" => $att_json_arr,
+					"compose_itemId"=>$_REQUEST["compose_itemId"],
+					"idmail_box" => null, 
+					"use_local_account" => true, "direct_sending" => true));
 				break;
 			case "upload_att":/*
 				print_r($_REQUEST);

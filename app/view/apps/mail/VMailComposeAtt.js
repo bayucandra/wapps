@@ -1,15 +1,34 @@
 Ext.define('B.view.apps.mail.VMailComposeAtt',{
 	extend:'Ext.grid.Panel',
 	height:150,
+	requires:[
+		'B.view.apps.mail.MMailComposeAtt'
+	],
 // 	hideHeaders:true,
 	compose_itemId:'',
 	alias:'widget.VMailComposeAtt',
-	store:'SMailComposeAtt',
+//	store:'SMailComposeAtt',
+	initComponent:function(){
+		var store_att=Ext.create('Ext.data.Store',{
+			model:'B.view.apps.mail.MMailComposeAtt',
+			proxy:{
+				type:'memory',
+				reader:{
+					type:'json',
+					rootProperty:'records'
+				}
+			}
+		});
+		Ext.apply(this,{
+			store:store_att
+		});
+		this.callParent();
+	},
 	columns:{
 		defaults:{dragable:false,hideable:false},
 		items:[
 			{text:'File name',dataIndex:'file_name',flex:7},
-			{text:'Status',dataIndex:'status',flex:2},
+			{text:'Status',dataIndex:'status',flex:3},
 			{xtype:'actioncolumn',width:30,sortable:false,menuDisabled:true,
 				items:[{
 					icon:'res/images/btn-icons/def_delete.png',
@@ -70,6 +89,12 @@ Ext.define('B.view.apps.mail.VMailComposeAtt',{
 							store.sync();
 						},
 						failure:function(){
+							store.each(function(record,id){
+								if(record.get('file_name')==v){
+									record.set('status','Failed');
+								}
+							});
+							store.sync();
 							Ext.Msg.show({
 								title:'Error',
 								msg:this.response.responseText,

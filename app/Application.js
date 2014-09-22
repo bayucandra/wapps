@@ -10,7 +10,7 @@ Ext.define('B.Application', {
 
     views: [
         // TODO: add views here
-	'main.Main','apps.mail.VMail','apps.mail.VMailTree','apps.mail.VMailInbox', 'apps.mail.VMailInboxList','apps.mail.VMailAddr','apps.mail.VMailAttachment', 'apps.mail.VMailComposeTb', 'apps.mail.VMailComposeAtt', 'apps.mail.WMailAddrInput'
+	'main.Main','apps.mail.VMail','apps.mail.VMailTree','apps.mail.VMailInbox', 'apps.mail.VMailInboxList','apps.mail.VMailAddr','apps.mail.VMailAttachment', 'apps.mail.VMailComposeForm', 'apps.mail.VMailComposeAtt', 'apps.mail.WMailAddrInput'
 	,'menu.MenuMail'
     ],
 
@@ -21,7 +21,7 @@ Ext.define('B.Application', {
 
     stores: [
         // TODO: add stores here
-	'SMailInboxList','SMailAddrInput','SMailAddrBook','SMailComposeAtt'
+	'SMailInboxList','SMailAddrInput','SMailAddrBook'
     ],
     
     launch: function () {

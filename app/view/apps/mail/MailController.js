@@ -106,16 +106,21 @@ Ext.define('B.view.apps.mail.MailController',{
 				items:[{
 					xtype:'panel',
 					flex:3,
-					layout:'vbox',
+					overflowY:'scroll',
 					items:[{
-						xtype:'VMailComposeTb',
-						width:'100%',
-						flex:4
+						xtype:'VMailComposeForm'
 					},{
 						xtype:'VMailComposeAtt',
 						compose_itemId:item_id,
-						width:'100%',
-						flex:6
+						minHeight:200
+					}],
+					tbar:[{
+							text:'Send',
+							handler:this.mailComposeSend
+						},{
+							text:'Save draft'
+						},{
+							text:'Cancel'
 					}]
 				},{
 					xtype:'panel',
@@ -190,12 +195,61 @@ Ext.define('B.view.apps.mail.MailController',{
 	},
 	mailComposeSend:function(btn){
 		var panel_container=btn.up('panel[itemId^=mail_compose_tab_]');
-		var tab_itemId=panel_container.getItemId();
-		var ckeditor_val=CKEDITOR.instances[tab_itemId].getData();
-		
-		var bdz_id='bdz_'+tab_itemId;
-		var bdz_obj=Dropzone.forElement('div#'+bdz_id);
-		alert(bdz_obj.getAcceptedFiles()[1].size);
+		var compose_itemId=panel_container.getItemId();
+		var ckeditor_val=CKEDITOR.instances[compose_itemId].getData();
+		var form_panel=panel_container.down('VMailComposeForm');
+		var addr_to_csv=form_panel.getForm().getValues(false,false,false,true).addr_to;
+		var addr_cc_csv=form_panel.getForm().getValues(false,false,false,true).addr_cc;
+		var subject=form_panel.getForm().getValues(false,false,false,true).subject;
+		var store_attachment=form_panel.nextSibling('VMailComposeAtt').getStore();
+		var att_json=[];
+		store_attachment.each(function(record,id){
+			att_json.push({'file_name':record.get('file_name')});
+		});
+		/*============BEGIN VALIDATION=======*/
+		var is_input_invalid=false;
+		if(bisnull(ckeditor_val)){
+			is_input_invalid=true;
+			Ext.Msg.show({
+				title:'Error',
+				msg:'Please don\'t left your message empty',
+				buttons:Ext.Msg.OK,
+				icon:Ext.Msg.ERROR
+			});
+		}
+		if(bisnull(addr_to_csv)){
+			is_input_invalid=true;
+			Ext.Msg.show({
+				title:'Error',
+				msg:'Please fill "TO" address',
+				buttons:Ext.Msg.OK,
+				icon:Ext.Msg.ERROR
+			});
+		}
+		if(bisnull(subject)){
+			is_input_invalid=true;
+			Ext.Msg.show({
+				title:'Error',
+				msg:'Please fill "Subject" field',
+				buttons:Ext.Msg.OK,
+				icon:Ext.Msg.ERROR
+			});
+		}
+		if(is_input_invalid)
+			return false;
+		/************END VALIDATION********/
+		Ext.Ajax.request({
+			url:'res/php/email.php',
+			params:{
+				section:'send_mail',
+				att_json:Ext.encode(att_json),
+				addr_to_csv:addr_to_csv,
+				addr_cc_csv:addr_cc_csv,
+				subject:subject,
+				msg:ckeditor_val,
+				compose_itemId:compose_itemId
+			}
+		});
 	},
 	mailComposeTabBeforeClose:function(pnl){
 		var itemId=pnl.getItemId();

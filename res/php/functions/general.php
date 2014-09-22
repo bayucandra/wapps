@@ -105,4 +105,36 @@
 		
 		return $ipaddress;
 	}
+	function brfc822_addr_parse($p_csv_addrs){//a@b.com,c@d.com,e@f.com (No spaces)
+		$ret_arr=array();
+		$has_invalid_emails=false;
+		$arr_addrs=explode(',',trim($p_csv_addrs));
+		foreach($arr_addrs as $addr){
+			$is_email_valid=true;
+			$addr_split=explode('<',$addr);
+			if(count($addr_split)==1){
+				$ret_arr[]=array("contact_name"=>"","email_address"=>$addr_split[0]);
+				if(function_exists("filter_var")){
+					if(!filter_var($addr_split[0],FILTER_VALIDATE_EMAIL)){
+						$has_invalid_emails=true;
+					}
+				}
+			}else{
+				$contact_name=trim($addr_split[0]);
+				$email_address=str_replace(">","",trim($addr_split[1]));
+				$ret_arr[]=array("contact_name"=>$contact_name,"email_address"=>$email_address);
+				
+				if(function_exists("filter_var")){
+					if(!filter_var($email_address,FILTER_VALIDATE_EMAIL)){
+						$has_invalid_emails=true;
+					}
+				}
+			}
+		}
+		if($has_invalid_emails){
+			return false;
+		}else{
+			return $ret_arr;
+		}
+	}
 ?>

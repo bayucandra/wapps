@@ -53,20 +53,31 @@ Ext.define('B.view.apps.mail.WMailAddrInput',{
 			hideLabel:true,
 			hideTrigger:true,
 			minChars:2,
+			queryMode:'remote',
 			name:'rfc822_addr',
 			flex:1,
 			store:'SMailAddrBook',
-			displayField:'val',
-			emptyText:'Input an email address then ENTER 2x',
+//			displayField:'val',
+			emptyText:'Input an email address then ENTER',
 			listConfig:{
 				getInnerTpl:function(){
 					return '{addr}';
 				}
 			},
 			listeners:{
-				specialKey:'inpEnter'
+				specialKey:'inpEnter',
+				change:function(th,nv,ov,opts){
+				    var store=Ext.getStore('SMailAddrBook');
+				    if(store.getCount()<1){
+					th.collapse();
+				    }
+				}
 			},
 			pageSize:extjs_conf.addrs_book_page_size
+		},{
+		    xtype:'button',
+		    width:30,
+		    text:'Add'
 		}]
 	}],
 	listeners:{
